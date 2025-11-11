@@ -64,9 +64,9 @@ const ResultCard: React.FC<ResultCardProps> = ({ frameId, score, explanation }) 
                 <h6 className={`font-bold text-xl ${textColorClass}`}>{frame.name}</h6>
                 <span className={`font-mono font-bold text-xl ml-auto ${scoreColor}`}>{score}점</span>
             </div>
-            <div className="space-y-3 text-lg">
+            <div className="space-y-3 text-xl">
                  <FormattedText text={explanation} className="text-gray-700 leading-relaxed"/>
-                 <p className="text-gray-500 text-base border-t border-gray-200 pt-2 mt-3">
+                 <p className="text-gray-500 text-base border-t border-gray-200 pt-3 mt-4">
                      💡 {frame.description}
                  </p>
             </div>
@@ -103,8 +103,8 @@ const TextAnalyzer: React.FC = () => {
     return (
         <div className="bg-white p-6 md:p-8 rounded-2xl border border-gray-200 shadow-lg transition-all duration-500">
             <h3 className="text-3xl font-semibold mb-6 text-gray-800 text-center">실시간 의도 분석</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-                {/* Left Column: Input */}
+            <div className="flex flex-col gap-8">
+                {/* Top Section: Input */}
                 <div className="space-y-4">
                     <textarea
                         value={text}
@@ -123,8 +123,8 @@ const TextAnalyzer: React.FC = () => {
                     </button>
                 </div>
 
-                {/* Right Column: Output */}
-                <div className="relative min-h-[350px] bg-gray-50 rounded-lg p-6 border border-gray-200 md:sticky md:top-24">
+                {/* Bottom Section: Output */}
+                <div className="relative min-h-[280px] bg-gray-50 rounded-lg p-6 border border-gray-200">
                     {isLoading ? (
                         <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-600">
                             <svg className="animate-spin h-8 w-8 text-blue-500 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -138,7 +138,7 @@ const TextAnalyzer: React.FC = () => {
                             <div className="p-4 bg-red-50 text-red-700 border border-red-200 rounded-lg">{error}</div>
                         </div>
                     ) : result ? (
-                        <div className="animate-fade-in space-y-6">
+                        <div className="animate-fade-in space-y-8">
                             <div>
                                 <h4 className="text-2xl font-bold text-gray-900 mb-4">감지된 숨은 의도 유형</h4>
                                 {result.analysis.length > 0 ? (
@@ -155,10 +155,20 @@ const TextAnalyzer: React.FC = () => {
                                     </div>
                                 )}
                             </div>
-                             <div>
-                                <h4 className="text-2xl font-bold text-gray-900 mb-3">종합 분석</h4>
-                                <FormattedText text={result.summary} className="text-gray-800 leading-relaxed text-lg bg-white/60 p-4 rounded-md border"/>
+                            
+                            {result.comprehensiveAnalysis && (
+                            <div>
+                                <h4 className="text-2xl font-bold text-gray-900 mb-3 flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    <span>AI 종합 분석 리포트</span>
+                                </h4>
+                                <div className="bg-white p-6 rounded-lg border border-gray-200 text-xl">
+                                  <FormattedText text={result.comprehensiveAnalysis} className="text-gray-800 leading-relaxed"/>
+                                </div>
                             </div>
+                            )}
                         </div>
                     ) : (
                          <div className="flex flex-col items-center justify-center h-full text-center text-gray-500">
@@ -166,7 +176,7 @@ const TextAnalyzer: React.FC = () => {
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                             </svg>
                             <h4 className="text-xl font-semibold mb-1">분석 결과를 여기에 표시합니다</h4>
-                            <p>왼쪽 입력창에 텍스트를 붙여넣고 분석 버튼을 눌러주세요.</p>
+                            <p>텍스트를 붙여넣고 분석 버튼을 눌러주세요.</p>
                         </div>
                     )}
                 </div>

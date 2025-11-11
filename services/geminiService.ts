@@ -37,13 +37,13 @@ const systemInstruction = `당신은 미디어 리터러시 전문가입니다. 
 분석할 숨은 의도 유형 목록:
 ${frameDescriptions}
 
-사용자가 제공한 텍스트를 분석하여 각 유형의 존재 여부와 강도를 0에서 100 사이의 점수(score)로 평가해주세요. 점수가 0이면 해당 유형이 전혀 나타나지 않음을 의미하고, 100이면 매우 강하게 나타남을 의미합니다. 각 유형에 대한 판단 근거를 간결하게 설명(explanation)해주세요.
+먼저, 사용자가 제공한 텍스트를 분석하여 각 유형의 존재 여부와 강도를 0에서 100 사이의 점수(score)로 평가해주세요. 점수가 0이면 해당 유형이 전혀 나타나지 않음을 의미하고, 100이면 매우 강하게 나타남을 의미합니다. 각 유형에 대한 판단 근거를 간결하게 설명(explanation)해주세요. 점수가 10점 미만으로 낮은 유형은 결과에 포함하지 마세요.
 
-마지막으로, 분석 결과를 바탕으로 텍스트에 담긴 전체적인 숨은 의도나 목적을 요약(summary)해주세요.
+그 다음, 위의 분석 결과를 종합하여 텍스트에 담긴 전체적인 숨은 의도와 목적, 그리고 이 글을 읽는 독자가 주의해야 할 점과 비판적으로 받아들이는 방법에 대한 구체적인 조언을 담은 **'종합 분석 리포트(comprehensiveAnalysis)'**를 작성해주세요.
 
-**매우 중요**: 설명(explanation)과 요약(summary)을 작성할 때, 여러 문장으로 구성된 상세한 분석을 제공해야 합니다. 문단 구분이 필요할 경우 줄바꿈을 사용하여 가독성을 높여주세요. 핵심 내용은 '**'로 감싸 굵게 표시하고, 특히 강조하고 싶은 부분은 '__'로 감싸 밑줄을 쳐서 표시해주세요.
+**매우 중요**: '종합 분석 리포트'는 **상세한 분석과 구체적인 조언을 모두 포함**해야 합니다. 여러 문단으로 나누어 작성하고, 줄바꿈을 사용하여 가독성을 높여주세요. 핵심 내용은 '**'로 감싸 굵게 표시하고, 특히 강조하고 싶은 부분은 '__'로 감싸 밑줄을 쳐서 표시해주세요.
 
-응답은 반드시 JSON 형식이어야 하며, 다음 스키마를 따라야 합니다. 점수가 10점 미만으로 낮은 유형은 결과에 포함하지 마세요.`;
+응답은 반드시 JSON 형식이어야 하며, 다음 스키마를 따라야 합니다.`;
 
 const responseSchema = {
   type: Type.OBJECT,
@@ -71,12 +71,12 @@ const responseSchema = {
         required: ['frameId', 'score', 'explanation'],
       },
     },
-    summary: {
-      type: Type.STRING,
-      description: '텍스트에 담긴 숨은 의도에 대한 종합적인 요약',
+    comprehensiveAnalysis: {
+        type: Type.STRING,
+        description: '텍스트에 담긴 숨은 의도, 목적, 그리고 독자를 위한 비판적 읽기 조언을 포함한 종합 분석 리포트',
     },
   },
-  required: ['analysis', 'summary'],
+  required: ['analysis', 'comprehensiveAnalysis'],
 };
 
 
@@ -86,7 +86,7 @@ export interface AnalysisResult {
         score: number;
         explanation: string;
     }[];
-    summary: string;
+    comprehensiveAnalysis: string;
 }
 
 // FIX: Initialize GoogleGenAI with the API key from environment variables.
@@ -109,7 +109,7 @@ export const analyzeText = async (text: string): Promise<AnalysisResult> => {
         const jsonString = response.text;
         const result: AnalysisResult = JSON.parse(jsonString);
 
-        if (!result || typeof result.analysis === 'undefined' || typeof result.summary === 'undefined') {
+        if (!result || typeof result.analysis === 'undefined' || typeof result.comprehensiveAnalysis === 'undefined') {
             throw new Error("Invalid analysis result format.");
         }
         
