@@ -243,8 +243,8 @@ const Dashboard: React.FC = () => {
       {/* Features Section */}
       <div className="space-y-12">
         <FeatureSection
-            title="주간 리포트로 소비 습관 파악"
-            description="어떤 유형의 콘텐츠를 주로 소비하는지 한눈에 파악하고, 숨겨진 소비 습관을 발견하세요. 지난주와 비교하여 소비 패턴의 변화를 추적하고 나의 콘텐츠 소비 패턴을 점검할 수 있습니다."
+            title="당신의 생각이 정말 '당신의 것'일까요?"
+            description="어떤 유형의 이야기에 반복적으로 노출되고 있는지 데이터로 확인하고, 나도 모르게 형성된 생각의 패턴을 발견하세요. 미디어 편식을 개선하고 더 균형잡힌 시각을 갖도록 도와드립니다."
         >
             <WeeklyReportPreview />
         </FeatureSection>

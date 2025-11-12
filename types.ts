@@ -7,6 +7,8 @@ export enum NarrativeFrameId {
   Scapegoating = 'scapegoating',
   PastGlory = 'past-glory',
   ThreatToValues = 'threat-to-values',
+  ExaggeratedPromises = 'exaggerated-promises',
+  UrgencyFomo = 'urgency-fomo',
 }
 
 export interface NarrativeFrame {

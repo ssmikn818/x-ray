@@ -68,4 +68,28 @@ export const NARRATIVE_FRAMES: Record<NarrativeFrameId, NarrativeFrame> = {
       </svg>
     ),
   },
+  [NarrativeFrameId.ExaggeratedPromises]: {
+    id: NarrativeFrameId.ExaggeratedPromises,
+    name: '과장된 약속',
+    description: "현실과 동떨어진 이익이나 결과를 보장하며 비판적 사고를 마비시키는 유형입니다.",
+    color: 'bg-exaggerated-promises',
+    hexColor: '#facc15',
+    icon: (
+       <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+      </svg>
+    ),
+  },
+  [NarrativeFrameId.UrgencyFomo]: {
+    id: NarrativeFrameId.UrgencyFomo,
+    name: '긴급함/소외 불안감 조성',
+    description: "제한된 시간이나 기회를 강조하여 성급한 결정을 유도하는 유형입니다.",
+    color: 'bg-urgency-fomo',
+    hexColor: '#f97316',
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
+  },
 };

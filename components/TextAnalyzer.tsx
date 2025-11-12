@@ -85,6 +85,8 @@ const ResultCard: React.FC<ResultCardProps> = ({ frameId, score, explanation }) 
             case NarrativeFrameId.Scapegoating: return 'text-amber-600';
             case NarrativeFrameId.PastGlory: return 'text-teal-600';
             case NarrativeFrameId.ThreatToValues: return 'text-rose-600';
+            case NarrativeFrameId.ExaggeratedPromises: return 'text-yellow-500';
+            case NarrativeFrameId.UrgencyFomo: return 'text-orange-600';
             default: return 'text-gray-800';
         }
     }, [frameId]);
@@ -109,25 +111,57 @@ const ResultCard: React.FC<ResultCardProps> = ({ frameId, score, explanation }) 
     );
 };
 
-const ScoreIndicator: React.FC<{ score: number }> = ({ score }) => {
-    const scoreColor = score > 70 ? 'bg-red-500' : score > 40 ? 'bg-amber-500' : 'bg-green-600';
-    const scoreTextColor = score > 70 ? 'text-red-600' : score > 40 ? 'text-amber-600' : 'text-green-700';
-    const scoreDescription = score > 70 ? '주의 필요' : score > 40 ? '의도 보임' : '중립적';
+interface AnalysisSummaryProps {
+  score: number;
+  genre: string;
+  intentionSummary: string;
+}
 
+const AnalysisSummary: React.FC<AnalysisSummaryProps> = ({ score, genre, intentionSummary }) => {
+    const levelInfo = useMemo(() => {
+        if (score > 70) {
+            return {
+                level: '높음',
+                color: 'bg-red-500',
+                textColor: 'text-red-600',
+            };
+        }
+        if (score > 40) {
+            return {
+                level: '보통',
+                color: 'bg-amber-500',
+                textColor: 'text-amber-600',
+            };
+        }
+        return {
+            level: '낮음',
+            color: 'bg-green-600',
+            textColor: 'text-green-700',
+        };
+    }, [score]);
+    
     return (
-        <div className="text-center p-6 bg-white rounded-xl border border-gray-200">
-            <h5 className="font-bold text-gray-800 text-xl mb-3">종합 의도 분석 점수</h5>
-            <div className="flex items-center justify-center gap-4">
-                 <div className={`font-black text-6xl ${scoreTextColor}`}>
-                    {score}
+        <div className="p-6 bg-white rounded-xl border border-gray-200">
+            <h5 className="font-bold text-gray-800 text-xl mb-4 text-center">종합 분석 요약</h5>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
+                 {/* Left side: Level */}
+                <div className="text-center bg-gray-50 p-4 rounded-lg border border-gray-200 h-full flex flex-col justify-center">
+                     <p className="text-gray-500 text-base">숨은 의도 강도</p>
+                     <p className={`mt-1 font-bold text-3xl ${levelInfo.textColor}`}>{levelInfo.level}</p>
                 </div>
-                <div className="text-left">
-                    <span className={`px-3 py-1 text-base font-bold text-white rounded-full ${scoreColor}`}>{scoreDescription}</span>
-                    <p className="text-gray-500 mt-1 text-base">숨은 의도 강도</p>
-                </div>
+                {/* Middle side: Intention */}
+                 <div className="text-center bg-gray-50 p-4 rounded-lg border border-gray-200 h-full flex flex-col justify-center">
+                     <p className="font-semibold text-gray-500 text-base">AI가 판단한 핵심 의도</p>
+                     <p className={`px-3 py-1 mt-1 text-xl font-bold text-white rounded-full inline-block ${levelInfo.color}`}>{intentionSummary || '분석 중...'}</p>
+                 </div>
+                 {/* Right side: Genre */}
+                 <div className="text-center bg-gray-50 p-4 rounded-lg border border-gray-200 h-full flex flex-col justify-center">
+                     <p className="font-semibold text-gray-500 text-base">글의 유형</p>
+                     <p className="font-bold text-blue-600 text-3xl mt-1">{genre}</p>
+                 </div>
             </div>
-             <div className="w-full bg-gray-200 rounded-full h-3.5 mt-4 overflow-hidden">
-                <div className={`${scoreColor} h-3.5 rounded-full`} style={{ width: `${score}%` }}></div>
+            <div className="w-full bg-gray-200 rounded-full h-3.5 mt-5 overflow-hidden">
+                <div className={`${levelInfo.color} h-3.5 rounded-full transition-all duration-500`} style={{ width: `${score}%` }}></div>
             </div>
         </div>
     );
@@ -202,7 +236,7 @@ const TextAnalyzer: React.FC = () => {
                              {typeof result.manipulationIndex === 'number' && (
                                 <div>
                                     <h4 className="text-2xl font-bold text-gray-900 mb-4">분석 요약</h4>
-                                    <ScoreIndicator score={result.manipulationIndex} />
+                                    <AnalysisSummary score={result.manipulationIndex} genre={result.genre} intentionSummary={result.intentionSummary}/>
                                 </div>
                             )}
 
@@ -218,7 +252,7 @@ const TextAnalyzer: React.FC = () => {
                                 ) : (
                                     <div className="text-center p-6 bg-white rounded-lg border">
                                         <p className="text-gray-600 text-lg">특별히 감지된 숨은 의도 유형이 없습니다.</p>
-                                        <p className="text-gray-500 mt-1">글의 내용이 중립적이거나, 정의된 유형과 관련이 없을 수 있습니다.</p>
+                                        <p className="text-gray-500 mt-1">이 글은 중립적이거나 논리적 근거에 기반한 주장일 수 있습니다.</p>
                                     </div>
                                 )}
                             </div>
