@@ -3,6 +3,8 @@ import Header from './components/Header';
 import Dashboard from './components/Dashboard';
 import OnboardingModal from './components/OnboardingModal';
 import TextAnalyzer from './components/TextAnalyzer';
+import FrustratingContentShowcase from './components/FrustratingContentShowcase';
+import ValueProposition from './components/ValueProposition';
 
 const App: React.FC = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -32,8 +34,16 @@ const App: React.FC = () => {
           </p>
         </div>
 
-        <div className="mb-24">
+        <div className="mb-12">
           <TextAnalyzer />
+        </div>
+
+        <div className="mb-12">
+          <FrustratingContentShowcase />
+        </div>
+
+        <div className="mb-24">
+            <ValueProposition />
         </div>
 
         <Dashboard />

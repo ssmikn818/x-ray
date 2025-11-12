@@ -182,8 +182,8 @@ const FAQItem: React.FC<{ q: string; a: string; }> = ({ q, a }) => {
                 </p>
             </div>
         </div>
-    );
-};
+    </div>
+);
 
 
 const faqs = [
@@ -208,16 +208,16 @@ const faqs = [
 const FinalCTA: React.FC = () => (
     <div className="text-center py-16 px-8 bg-white border border-gray-200 shadow-lg rounded-2xl my-24">
         <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">
-           가장 먼저 새로운 기능을 만나보세요
+           망설이면 늦어요! 얼리버드 혜택 신청하기
         </h2>
-        <p className="mt-4 max-w-2xl mx-auto text-xl text-gray-600">
-            X-Ray의 정식 출시 소식을 이메일로 가장 먼저 알려드립니다.
+        <p className="mt-4 max-w-3xl mx-auto text-xl text-gray-600">
+            정식 출시 소식과 함께 <strong className="text-blue-600">베타 테스트 우선 참여권, 향후 유료 기능 할인</strong> 등 특별한 혜택을 가장 먼저 보내드립니다.
         </p>
         <div className="mt-10 max-w-2xl mx-auto">
              <form className="flex flex-col sm:flex-row gap-3" onSubmit={(e) => e.preventDefault()}>
                 <input type="email" placeholder="이메일 주소를 입력해주세요" required className="flex-grow px-5 py-4 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200" />
                 <button type="submit" className="px-8 py-4 bg-blue-600 text-white font-bold rounded-lg transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-300 text-lg shadow-lg hover:shadow-blue-500/30 transform hover:-translate-y-0.5">
-                    출시 알림 받기
+                    얼리버드 혜택 신청하기
                 </button>
              </form>
              <p className="text-sm text-gray-500 mt-4">스팸은 보내지 않아요! 오직 X-Ray의 새로운 소식만 알려드립니다.</p>
@@ -229,14 +229,14 @@ const FinalCTA: React.FC = () => (
 const Dashboard: React.FC = () => {
   return (
     <div className="animate-fade-in space-y-24">
-      {/* Unified Hero Section */}
-      <div className="text-center pt-16">
+      {/* Unified Hero Section for upcoming features */}
+      <div className="text-center pt-16 bg-gray-100/70 rounded-3xl pb-16 px-4">
         <h2 className="text-5xl lg:text-6xl font-extrabold text-gray-900 leading-tight">
-            텍스트 분석을 넘어, <br className="hidden md:block" />
-            <span className="text-blue-600">당신의 미디어 생활 전체를 케어합니다</span>
+            출시 알림 신청하고, <br className="hidden md:block" />
+            <span className="text-blue-600">더 강력해질 X-Ray를 가장 먼저 만나보세요</span>
         </h2>
         <p className="mt-6 max-w-3xl mx-auto text-xl lg:text-2xl text-gray-600">
-            X-Ray는 당신이 소비하는 모든 콘텐츠를 더 깊이 이해하고, 건강한 정보 소비 습관을 만들 수 있도록 돕는 강력한 도구입니다. 정식 출시될 핵심 기능들을 미리 만나보세요.
+            정식 버전에서는 텍스트 분석을 넘어, 당신의 미디어 소비 패턴 전체를 진단하고 코칭하는 개인 비서로 발전합니다. <strong className="text-gray-800">얼리버드에게만 제공될 특별한 기능들</strong>을 미리 확인해보세요.
         </p>
       </div>
       
