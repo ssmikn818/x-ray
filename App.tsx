@@ -26,10 +26,10 @@ const App: React.FC = () => {
       <Header />
       <main className="container mx-auto p-4 md:p-8 max-w-7xl">
         <div className="text-center my-12 md:my-20 animate-fade-in">
-          <h2 className="text-5xl md:text-6xl font-bold text-gray-900 leading-tight mb-4">
+          <h2 className="text-5xl md:text-6xl font-bold text-gray-900 leading-snug mb-4">
             혹시, 이 글... 진짜일까?
           </h2>
-          <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto">
+          <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
             AI로 숨은 의도를 파헤쳐 보세요. 우리가 매일 보는 콘텐츠, 진짜 무엇을 말하고 싶은 걸까요?
           </p>
         </div>

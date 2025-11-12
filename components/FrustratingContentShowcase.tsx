@@ -15,7 +15,7 @@ const ExampleCard: React.FC<ExampleCardProps> = ({ title, content, icon, rotatio
             <div className="flex-shrink-0 text-gray-400 mt-1">{icon}</div>
             <h4 className="text-xl font-bold text-gray-800">{title}</h4>
         </div>
-        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200/80 text-gray-600 space-y-2 mb-4">
+        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200/80 text-gray-600 space-y-2 mb-4 leading-relaxed">
           {content.map((line, index) => <p key={index}>{line}</p>)}
         </div>
       </div>
@@ -33,10 +33,10 @@ interface ExampleDisplayProps {
 const ExampleDisplay: React.FC<ExampleDisplayProps> = ({ title, description, children, layout = 'right' }) => (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center">
         <div className={`space-y-4 ${layout === 'left' ? 'lg:order-last' : ''}`}>
-            <h3 className="text-3xl lg:text-4xl font-bold text-gray-900 leading-tight">
+            <h3 className="text-3xl lg:text-4xl font-bold text-gray-900 leading-snug">
                 {title}
             </h3>
-            <p className="text-xl text-gray-600">
+            <p className="text-xl text-gray-600 leading-relaxed">
                 {description}
             </p>
         </div>
@@ -101,10 +101,10 @@ const FrustratingContentShowcase: React.FC = () => {
   return (
     <div className="bg-gray-100/50 p-8 md:p-12 rounded-2xl border border-gray-200 animate-fade-in">
         <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight mb-4">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 leading-snug mb-4">
                 혹시, 이런 글 때문에 불편하셨나요?
             </h2>
-            <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
                 우리를 지치게 만드는 수많은 콘텐츠들. X-Ray는 바로 이런 글에 숨겨진 의도를 파악하기 위해 만들어졌습니다.
             </p>
         </div>

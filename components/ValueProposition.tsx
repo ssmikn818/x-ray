@@ -14,10 +14,10 @@ const FeatureSection: React.FC<FeatureSectionProps> = ({ title, description, chi
     <div className="bg-white p-8 md:p-12 rounded-2xl border border-gray-200 shadow-lg">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 md:gap-12 items-center">
             <div className={`space-y-4 lg:col-span-2 ${imagePosition === 'left' ? 'lg:order-last' : ''}`}>
-                <h3 className="text-3xl lg:text-4xl font-bold text-gray-900 leading-tight">
+                <h3 className="text-3xl lg:text-4xl font-bold text-gray-900 leading-snug">
                     {title}
                 </h3>
-                <p className="text-lg text-gray-600">
+                <p className="text-lg text-gray-600 leading-relaxed">
                     {description}
                 </p>
             </div>
@@ -103,10 +103,10 @@ const ValueProposition: React.FC = () => {
     return (
         <div className="py-12">
             <div className="text-center mb-16">
-                 <h2 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight mb-4">
+                 <h2 className="text-4xl md:text-5xl font-bold text-gray-900 leading-snug mb-4">
                     X-Ray가 <span className="text-blue-600">명쾌하게 해결해 드립니다</span>
                 </h2>
-                <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
+                <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
                     방금 보신 것과 같은 교묘한 콘텐츠, 더 이상 감정적으로 반응할 필요가 없습니다. X-Ray의 AI 분석으로 숨은 의도를 객관적으로 파악하고 현명하게 대처하세요.
                 </p>
             </div>

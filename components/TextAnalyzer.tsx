@@ -103,7 +103,7 @@ const ResultCard: React.FC<ResultCardProps> = ({ frameId, score, explanation }) 
             </div>
             <div className="space-y-3 text-xl">
                  <FormattedText text={explanation} className="text-gray-700 leading-relaxed"/>
-                 <p className="text-gray-500 text-base border-t border-gray-200 pt-3 mt-4">
+                 <p className="text-gray-500 text-base border-t border-gray-200 pt-3 mt-4 leading-relaxed">
                      💡 {frame.description}
                  </p>
             </div>
@@ -203,7 +203,7 @@ const TextAnalyzer: React.FC = () => {
                         value={text}
                         onChange={(e) => setText(e.target.value)}
                         placeholder="여기에 분석하고 싶은 글을 붙여넣으세요. (뉴스 기사, 댓글, SNS 게시물 등)"
-                        className="w-full h-72 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 text-lg resize-y bg-gray-50/50"
+                        className="w-full h-72 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 text-lg resize-y bg-gray-50/50 leading-relaxed"
                         disabled={isLoading}
                         rows={12}
                     />
