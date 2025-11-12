@@ -5,6 +5,7 @@ import OnboardingModal from './components/OnboardingModal';
 import TextAnalyzer from './components/TextAnalyzer';
 import FrustratingContentShowcase from './components/FrustratingContentShowcase';
 import ValueProposition from './components/ValueProposition';
+import Footer from './components/Footer';
 
 const App: React.FC = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -22,9 +23,9 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-800 font-sans">
+    <div className="min-h-screen bg-gray-50 text-gray-800 font-sans flex flex-col">
       <Header />
-      <main className="container mx-auto p-4 md:p-8 max-w-7xl">
+      <main className="container mx-auto p-4 md:p-8 max-w-7xl flex-grow">
         <div className="text-center my-12 md:my-20 animate-fade-in">
           <h2 className="text-5xl md:text-6xl font-bold text-gray-900 leading-snug mb-4">
             혹시, 이 글... 진짜일까?
@@ -48,6 +49,7 @@ const App: React.FC = () => {
 
         <Dashboard />
       </main>
+      <Footer />
       {showOnboarding && <OnboardingModal onClose={handleOnboardingComplete} />}
     </div>
   );

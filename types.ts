@@ -1,5 +1,5 @@
 // FIX: Import `ReactElement` and use it for the `icon` property to resolve the "Cannot find namespace 'JSX'" error.
-import type { ReactElement } from 'react';
+import type { ReactElement, SVGProps } from 'react';
 
 export enum NarrativeFrameId {
   UsVsThem = 'us-vs-them',
@@ -17,7 +17,8 @@ export interface NarrativeFrame {
   description: string;
   color: string;
   hexColor: string;
-  icon: ReactElement;
+  // FIX: Explicitly type icon props to allow cloning with className, as all icons are SVGs.
+  icon: ReactElement<SVGProps<SVGSVGElement>>;
 }
 
 export interface NarrativeDataPoint {

@@ -217,7 +217,7 @@ const TextAnalyzer: React.FC = () => {
                 </div>
 
                 {/* Bottom Section: Output */}
-                <div className="relative min-h-[280px] bg-gray-50 rounded-lg p-6 border border-gray-200">
+                <div className="relative min-h-[200px] bg-gray-50 rounded-lg p-6 border border-gray-200">
                     {isLoading ? (
                         <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-600">
                             <svg className="animate-spin h-8 w-8 text-blue-500 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

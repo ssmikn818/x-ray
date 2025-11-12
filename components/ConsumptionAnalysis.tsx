@@ -66,15 +66,12 @@ const ConsumptionAnalysis: React.FC<ConsumptionAnalysisProps> = ({ data }) => {
     }
 
     return (
-        <div className="mt-8 border-t border-gray-200 pt-6">
-            <h4 className="text-3xl font-semibold mb-4 text-gray-900">AI 생각 습관 진단</h4>
-            <div className="bg-blue-50/75 p-6 rounded-lg text-lg text-gray-700 leading-relaxed border border-blue-200/50 min-h-[150px]">
-                {isLoading && <p>AI 코치가 데이터를 분석하고 있습니다...</p>}
-                {error && <p className="text-red-600">{error}</p>}
-                {!isLoading && !error && (
-                    <FormattedText text={analysis} />
-                )}
-            </div>
+        <div className="bg-blue-50/75 p-6 rounded-lg text-lg text-gray-700 leading-relaxed border border-blue-200/50 w-full min-h-[150px]">
+            {isLoading && <p>AI 코치가 데이터를 분석하고 있습니다...</p>}
+            {error && <p className="text-red-600">{error}</p>}
+            {!isLoading && !error && (
+                <FormattedText text={analysis} />
+            )}
         </div>
     );
 };
