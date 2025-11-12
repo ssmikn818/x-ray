@@ -39,9 +39,10 @@ ${frameDescriptions}
 
 먼저, 사용자가 제공한 텍스트를 분석하여 각 유형의 존재 여부와 강도를 0에서 100 사이의 점수(score)로 평가해주세요. 점수가 0이면 해당 유형이 전혀 나타나지 않음을 의미하고, 100이면 매우 강하게 나타남을 의미합니다. 각 유형에 대한 판단 근거를 간결하게 설명(explanation)해주세요. 점수가 10점 미만으로 낮은 유형은 결과에 포함하지 마세요.
 
-그 다음, 위의 분석 결과를 종합하여 텍스트에 담긴 전체적인 숨은 의도와 목적, 그리고 이 글을 읽는 독자가 주의해야 할 점과 비판적으로 받아들이는 방법에 대한 구체적인 조언을 담은 **'종합 분석 리포트(comprehensiveAnalysis)'**를 작성해주세요.
-
-**매우 중요**: '종합 분석 리포트'는 **상세한 분석과 구체적인 조언을 모두 포함**해야 합니다. 여러 문단으로 나누어 작성하고, 줄바꿈을 사용하여 가독성을 높여주세요. 핵심 내용은 '**'로 감싸 굵게 표시하고, 특히 강조하고 싶은 부분은 '__'로 감싸 밑줄을 쳐서 표시해주세요.
+그 다음, 위의 분석 결과를 종합하여 **'종합 분석 리포트(comprehensiveAnalysis)'**를 다음 세 부분으로 나누어 작성해주세요. 각 부분은 상세하고 구체적인 내용을 담아 여러 문단으로 작성하고, 가독성을 위해 줄바꿈을 사용해주세요. 핵심 내용은 '**'로 감싸 굵게 표시하고, 특히 강조하고 싶은 부분은 '__'로 감싸 밑줄을 쳐서 표시해주세요.
+1.  **핵심 의도 요약 (summary)**: 텍스트의 핵심적인 숨은 의도와 전반적인 목적을 1-2문장으로 요약합니다.
+2.  **주요 설득 전략 (tactics)**: 분석된 숨은 의도 유형들이 어떻게 결합되어 독자를 설득하는지, 구체적인 설득 전략과 전술을 상세히 분석합니다.
+3.  **독자를 위한 조언 (advice)**: 독자가 이 글의 영향을 분별하고 비판적으로 수용하기 위해 취해야 할 구체적인 행동이나 생각해볼 점을 조언합니다.
 
 응답은 반드시 JSON 형식이어야 하며, 다음 스키마를 따라야 합니다.`;
 
@@ -72,9 +73,24 @@ const responseSchema = {
       },
     },
     comprehensiveAnalysis: {
-        type: Type.STRING,
-        description: '텍스트에 담긴 숨은 의도, 목적, 그리고 독자를 위한 비판적 읽기 조언을 포함한 종합 분석 리포트',
-    },
+        type: Type.OBJECT,
+        description: '텍스트에 담긴 숨은 의도, 목적, 그리고 독자를 위한 비판적 읽기 조언을 포함한 종합 분석 리포트. 각 필드는 상세하고 구체적인 내용을 담아야 합니다.',
+        properties: {
+            summary: {
+                type: Type.STRING,
+                description: '텍스트의 핵심적인 숨은 의도와 전반적인 목적을 1-2문장으로 요약합니다.'
+            },
+            tactics: {
+                type: Type.STRING,
+                description: '분석된 숨은 의도 유형들이 어떻게 결합되어 독자를 설득하는지, 구체적인 설득 전략과 전술을 상세히 분석합니다. 여러 문단으로 작성될 수 있습니다.'
+            },
+            advice: {
+                type: Type.STRING,
+                description: '독자가 이 글의 영향을 분별하고 비판적으로 수용하기 위해 취해야 할 구체적인 행동이나 생각해볼 점을 조언합니다. 여러 문단으로 작성될 수 있습니다.'
+            }
+        },
+        required: ['summary', 'tactics', 'advice']
+    }
   },
   required: ['analysis', 'comprehensiveAnalysis'],
 };
@@ -86,7 +102,11 @@ export interface AnalysisResult {
         score: number;
         explanation: string;
     }[];
-    comprehensiveAnalysis: string;
+    comprehensiveAnalysis: {
+        summary: string;
+        tactics: string;
+        advice: string;
+    };
 }
 
 // FIX: Initialize GoogleGenAI with the API key from environment variables.

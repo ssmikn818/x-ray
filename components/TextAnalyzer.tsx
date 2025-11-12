@@ -164,8 +164,19 @@ const TextAnalyzer: React.FC = () => {
                                     </svg>
                                     <span>AI 종합 분석 리포트</span>
                                 </h4>
-                                <div className="bg-white p-6 rounded-lg border border-gray-200 text-xl">
-                                  <FormattedText text={result.comprehensiveAnalysis} className="text-gray-800 leading-relaxed"/>
+                                <div className="bg-white p-6 rounded-lg border border-gray-200 text-xl space-y-6">
+                                  <div className="border-b border-gray-200 pb-4">
+                                      <h5 className="font-bold text-gray-800 text-xl mb-2">요약: 핵심 의도</h5>
+                                      <FormattedText text={result.comprehensiveAnalysis.summary} className="text-gray-800 leading-relaxed"/>
+                                  </div>
+                                  <div className="border-b border-gray-200 pb-4">
+                                      <h5 className="font-bold text-gray-800 text-xl mb-2">분석: 주요 설득 전략</h5>
+                                      <FormattedText text={result.comprehensiveAnalysis.tactics} className="text-gray-800 leading-relaxed"/>
+                                  </div>
+                                  <div>
+                                      <h5 className="font-bold text-gray-800 text-xl mb-2">조언: 비판적으로 읽기</h5>
+                                      <FormattedText text={result.comprehensiveAnalysis.advice} className="text-gray-800 leading-relaxed"/>
+                                  </div>
                                 </div>
                             </div>
                             )}
