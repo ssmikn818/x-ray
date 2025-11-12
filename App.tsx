@@ -22,7 +22,7 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800 font-sans">
       <Header />
-      <main className="container mx-auto p-4 md:p-8 max-w-screen-2xl">
+      <main className="container mx-auto p-4 md:p-8 max-w-7xl">
         <div className="text-center my-12 md:my-20 animate-fade-in">
           <h2 className="text-5xl md:text-6xl font-bold text-gray-900 leading-tight mb-4">
             혹시, 이 글... 진짜일까?

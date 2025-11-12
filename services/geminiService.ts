@@ -8,6 +8,7 @@ const frameInfo: Record<NarrativeFrameId, { name: string; description: string }>
     name: '편 가르기',
     description: "세상을 '우리'와 '적'으로 단순하게 나누어 갈등을 일으키는 유형입니다.",
   },
+  // FIX: Removed invalid Python code that was inserted here, causing a syntax error.
   [NarrativeFrameId.FearMongering]: {
     name: '불안감 조성',
     description: "위험을 실제보다 부풀려서 사람들의 두려움과 불안을 자극하는 유형입니다.",
@@ -32,26 +33,43 @@ const frameDescriptions = Object.entries(frameInfo).map(([id, frame]) =>
   `- ${frame.name} (${id}): ${frame.description}`
 ).join('\n');
 
-const systemInstruction = `당신은 미디어 리터러시 전문가입니다. 주어진 텍스트를 분석하여, 다음과 같은 '숨은 의도 유형(persuasive tactics)'이 얼마나 강하게 나타나는지 평가하고 숨겨진 의도를 파악하는 임무를 맡고 있습니다.
+const systemInstruction = `당신은 통찰력 있는 미디어 리터러시 전문가입니다. 당신의 임무는 주어진 텍스트를 분석하여, 사람들을 설득하거나 여론을 조작하기 위해 사용될 수 있는 '숨은 의도 유형(persuasive tactics)'이 사용되었는지 파악하는 것입니다.
 
-분석할 숨은 의도 유형 목록:
+**분석 프로세스:**
+
+**1. 텍스트 장르 및 논증 구조 파악 (가장 중요):**
+먼저, 텍스트의 성격을 규명하세요. 이 글은 객관적 보도를 지향하는 '뉴스 기사'입니까, 필자의 주관적 견해를 논리적으로 펼치는 '사설/칼럼'입니까, 혹은 감정적 반응이 주가 되는 'SNS 게시물/댓글'입니까?
+- **사설/칼럼의 경우:** 강한 어조와 명확한 주장은 당연합니다. 이 경우, 주장을 뒷받침하는 **논리적 근거가 제시되는지**를 핵심적으로 평가해야 합니다. 근거가 합리적이라면, 단순히 어조가 강하다는 이유만으로 높은 조작 지수를 부여해서는 안됩니다.
+- **뉴스 기사의 경우:** 사실 전달이 목적이므로, 감정적 단어 선택이나 특정 관점의 부각이 두드러진다면 조작 의도를 의심해야 합니다.
+- 분석의 핵심은 **'논리적 비판'과 '감정적 선동'을 구분**하는 것입니다.
+
+**2. 숨은 의도 유형 분석:**
+위의 맥락 분석을 바탕으로, 아래 목록의 각 유형이 '독자를 **비논리적이거나 감정적인 방식으로** 특정 방향으로 이끌려는 **의도적인** 설득 전략'으로 사용되었는지 판단하세요.
+- 분석할 숨은 의도 유형 목록:
 ${frameDescriptions}
+- 각 유형의 사용 강도를 0에서 100 사이의 점수(score)로 평가하고, 판단 근거를 간결하게 설명(explanation)해주세요.
+- **점수가 30점 미만으로 낮거나, 설득 의도가 명확하지 않은 유형은 결과에 포함하지 마세요.** 논리적 근거를 갖춘 비판적 주장은 숨은 의도 유형으로 분류하지 않습니다.
 
-먼저, 사용자가 제공한 텍스트를 분석하여 각 유형의 존재 여부와 강도를 0에서 100 사이의 점수(score)로 평가해주세요. 점수가 0이면 해당 유형이 전혀 나타나지 않음을 의미하고, 100이면 매우 강하게 나타남을 의미합니다. 각 유형에 대한 판단 근거를 간결하게 설명(explanation)해주세요. 점수가 10점 미만으로 낮은 유형은 결과에 포함하지 마세요.
-
-그 다음, 위의 분석 결과를 종합하여 **'종합 분석 리포트(comprehensiveAnalysis)'**를 다음 세 부분으로 나누어 작성해주세요. 각 부분은 상세하고 구체적인 내용을 담아 여러 문단으로 작성하고, 가독성을 위해 줄바꿈을 사용해주세요. 핵심 내용은 '**'로 감싸 굵게 표시하고, 특히 강조하고 싶은 부분은 '__'로 감싸 밑줄을 쳐서 표시해주세요.
-1.  **핵심 의도 요약 (summary)**: 텍스트의 핵심적인 숨은 의도와 전반적인 목적을 1-2문장으로 요약합니다.
-2.  **주요 설득 전략 (tactics)**: 분석된 숨은 의도 유형들이 어떻게 결합되어 독자를 설득하는지, 구체적인 설득 전략과 전술을 상세히 분석합니다.
-3.  **독자를 위한 조언 (advice)**: 독자가 이 글의 영향을 분별하고 비판적으로 수용하기 위해 취해야 할 구체적인 행동이나 생각해볼 점을 조언합니다.
+**3. 종합 평가 및 리포트 작성:**
+- **조작 지수(manipulationIndex):** 모든 분석을 종합하여, 텍스트의 전반적인 조작 의도나 설득 강도를 0에서 100 사이의 점수로 평가해주세요. 이 점수는 **논증 구조의 부재, 감정적 호소의 강도**에 비례해야 합니다.
+- **종합 분석 리포트(comprehensiveAnalysis):** 분석 결과를 바탕으로 아래 형식에 맞춰 리포트를 작성해주세요. 만약 분석된 숨은 의도 유형이 없다면, 해당 텍스트가 **논리적 근거를 기반으로 한 비판적 의견이나 주장일 가능성이 높다는 점**을 명확히 밝혀주세요.
+    - **매우 중요**: 리포트의 각 항목은 **분류된 개조식(bullet points)**으로 작성해주세요. **각 항목은 반드시 줄바꿈(newline)으로 구분하고, '-'로 시작해야 합니다.** 모든 문장은 **명사형으로 간결하게 종결**해야 합니다(예: '불안감 조성', '특정 집단에 대한 부정적 이미지 형성함'). 핵심 내용은 '**'로 감싸 굵게 표시하고, 특히 강조하고 싶은 부분은 '__'로 감싸 밑줄을 쳐서 표시해주세요.
+    1.  **핵심 의도 분석 (summary)**: 텍스트에 내재된 핵심 의도와 목적을 분석하여 명사형으로 요약.
+    2.  **주요 설득 전략 (tactics)**: 사용된 주요 설득 전략과 그 효과를 구체적으로 분류하여 명사형으로 기술.
+    3.  **비판적 사고를 위한 제언 (advice)**: 독자가 콘텐츠를 비판적으로 수용하기 위해 고려해야 할 사항들을 명사형으로 제안.
 
 응답은 반드시 JSON 형식이어야 하며, 다음 스키마를 따라야 합니다.`;
 
 const responseSchema = {
   type: Type.OBJECT,
   properties: {
+    manipulationIndex: {
+        type: Type.NUMBER,
+        description: '텍스트의 전반적인 조작 및 설득 의도 강도를 나타내는 종합 점수 (0-100)',
+    },
     analysis: {
       type: Type.ARRAY,
-      description: '분석된 숨은 의도 유형 목록 (점수가 10점 이상인 것만)',
+      description: '분석된 숨은 의도 유형 목록 (점수가 30점 이상인 것만)',
       items: {
         type: Type.OBJECT,
         properties: {
@@ -74,29 +92,30 @@ const responseSchema = {
     },
     comprehensiveAnalysis: {
         type: Type.OBJECT,
-        description: '텍스트에 담긴 숨은 의도, 목적, 그리고 독자를 위한 비판적 읽기 조언을 포함한 종합 분석 리포트. 각 필드는 상세하고 구체적인 내용을 담아야 합니다.',
+        description: '텍스트에 담긴 숨은 의도, 목적, 그리고 독자를 위한 비판적 읽기 조언을 포함한 종합 분석 리포트. 각 필드는 명사형으로 종결되는 개조식(bullet points) 형식이어야 합니다.',
         properties: {
             summary: {
                 type: Type.STRING,
-                description: '텍스트의 핵심적인 숨은 의도와 전반적인 목적을 1-2문장으로 요약합니다.'
+                description: "텍스트의 핵심적인 숨은 의도와 전반적인 목적을 명사형 개조식으로 요약."
             },
             tactics: {
                 type: Type.STRING,
-                description: '분석된 숨은 의도 유형들이 어떻게 결합되어 독자를 설득하는지, 구체적인 설득 전략과 전술을 상세히 분석합니다. 여러 문단으로 작성될 수 있습니다.'
+                description: "분석된 숨은 의도 유형들이 어떻게 결합되어 독자를 설득하는지, 구체적인 설득 전략과 전술을 명사형 개조식으로 상세히 분석."
             },
             advice: {
                 type: Type.STRING,
-                description: '독자가 이 글의 영향을 분별하고 비판적으로 수용하기 위해 취해야 할 구체적인 행동이나 생각해볼 점을 조언합니다. 여러 문단으로 작성될 수 있습니다.'
+                description: "독자가 이 글의 영향을 분별하고 비판적으로 수용하기 위해 취해야 할 구체적인 행동이나 생각해볼 점을 명사형 개조식으로 제안."
             }
         },
         required: ['summary', 'tactics', 'advice']
     }
   },
-  required: ['analysis', 'comprehensiveAnalysis'],
+  required: ['manipulationIndex', 'analysis', 'comprehensiveAnalysis'],
 };
 
 
 export interface AnalysisResult {
+    manipulationIndex: number;
     analysis: {
         frameId: NarrativeFrameId;
         score: number;
@@ -129,7 +148,7 @@ export const analyzeText = async (text: string): Promise<AnalysisResult> => {
         const jsonString = response.text;
         const result: AnalysisResult = JSON.parse(jsonString);
 
-        if (!result || typeof result.analysis === 'undefined' || typeof result.comprehensiveAnalysis === 'undefined') {
+        if (!result || typeof result.analysis === 'undefined' || typeof result.comprehensiveAnalysis === 'undefined' || typeof result.manipulationIndex === 'undefined') {
             throw new Error("Invalid analysis result format.");
         }
         

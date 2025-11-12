@@ -4,30 +4,65 @@ import { NARRATIVE_FRAMES } from '../constants';
 import { NarrativeFrameId } from '../types';
 
 const FormattedText: React.FC<{ text: string; className?: string }> = ({ text, className }) => {
-    const parts = useMemo(() => {
-        if (!text) return [];
-        return text.split('\n').map((line, lineIndex) => {
-            if (line.trim() === '') return <br key={`br-${lineIndex}`} />;
-            
-            const segments = line.split(/(\*\*.*?\*\*|__.*?__)/g).filter(Boolean);
+    const renderBlocks = useMemo(() => {
+        if (!text) return null;
+        const blocks = [];
+        const lines = text.split('\n');
+        let currentList: React.ReactNode[] = [];
 
-            return (
-                <p key={lineIndex} className="mb-2">
-                    {segments.map((segment, segIndex) => {
+        const flushList = () => {
+            if (currentList.length > 0) {
+                blocks.push(<ul key={`ul-${blocks.length}`} className="space-y-1">{currentList}</ul>);
+                currentList = [];
+            }
+        };
+
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            const trimmedLine = line.trim();
+            
+            if (trimmedLine.startsWith('- ') || trimmedLine.startsWith('* ')) {
+                const content = trimmedLine.substring(2);
+                const segments = content.split(/(\*\*.*?\*\*|__.*?__)/g).filter(Boolean);
+                const renderedSegments = segments.map((segment, segIndex) => {
+                     if (segment.startsWith('**') && segment.endsWith('**')) {
+                        return <strong key={segIndex} className="font-bold text-gray-900">{segment.slice(2, -2)}</strong>;
+                    }
+                    if (segment.startsWith('__') && segment.endsWith('__')) {
+                        return <u key={segIndex}>{segment.slice(2, -2)}</u>;
+                    }
+                    return <span key={segIndex}>{segment}</span>;
+                });
+                currentList.push(
+                    <li key={`li-${i}`} className="flex items-start">
+                        <span className="mr-3 mt-1.5 text-blue-500 flex-shrink-0">&#8226;</span>
+                        <span className="flex-1">{renderedSegments}</span>
+                    </li>
+                );
+            } else {
+                flushList();
+                if (trimmedLine !== '') {
+                    const segments = line.split(/(\*\*.*?\*\*|__.*?__)/g).filter(Boolean);
+                    const renderedSegments = segments.map((segment, segIndex) => {
                         if (segment.startsWith('**') && segment.endsWith('**')) {
-                            return <strong key={segIndex} className="font-bold">{segment.slice(2, -2)}</strong>;
+                            return <strong key={segIndex} className="font-bold text-gray-900">{segment.slice(2, -2)}</strong>;
                         }
                         if (segment.startsWith('__') && segment.endsWith('__')) {
                             return <u key={segIndex}>{segment.slice(2, -2)}</u>;
                         }
                         return <span key={segIndex}>{segment}</span>;
-                    })}
-                </p>
-            );
-        });
+                    });
+                     blocks.push(<p key={`p-${i}`} className="mb-2">{renderedSegments}</p>);
+                } else if (i < lines.length - 1 && lines[i+1].trim() !== '') {
+                     blocks.push(<br key={`br-${i}`} />);
+                }
+            }
+        }
+        flushList();
+        return blocks;
     }, [text]);
 
-    return <div className={className}>{parts}</div>;
+    return <div className={className}>{renderBlocks}</div>;
 };
 
 
@@ -69,6 +104,30 @@ const ResultCard: React.FC<ResultCardProps> = ({ frameId, score, explanation }) 
                  <p className="text-gray-500 text-base border-t border-gray-200 pt-3 mt-4">
                      💡 {frame.description}
                  </p>
+            </div>
+        </div>
+    );
+};
+
+const ScoreIndicator: React.FC<{ score: number }> = ({ score }) => {
+    const scoreColor = score > 70 ? 'bg-red-500' : score > 40 ? 'bg-amber-500' : 'bg-green-600';
+    const scoreTextColor = score > 70 ? 'text-red-600' : score > 40 ? 'text-amber-600' : 'text-green-700';
+    const scoreDescription = score > 70 ? '주의 필요' : score > 40 ? '의도 보임' : '중립적';
+
+    return (
+        <div className="text-center p-6 bg-white rounded-xl border border-gray-200">
+            <h5 className="font-bold text-gray-800 text-xl mb-3">종합 의도 분석 점수</h5>
+            <div className="flex items-center justify-center gap-4">
+                 <div className={`font-black text-6xl ${scoreTextColor}`}>
+                    {score}
+                </div>
+                <div className="text-left">
+                    <span className={`px-3 py-1 text-base font-bold text-white rounded-full ${scoreColor}`}>{scoreDescription}</span>
+                    <p className="text-gray-500 mt-1 text-base">숨은 의도 강도</p>
+                </div>
+            </div>
+             <div className="w-full bg-gray-200 rounded-full h-3.5 mt-4 overflow-hidden">
+                <div className={`${scoreColor} h-3.5 rounded-full`} style={{ width: `${score}%` }}></div>
             </div>
         </div>
     );
@@ -139,6 +198,14 @@ const TextAnalyzer: React.FC = () => {
                         </div>
                     ) : result ? (
                         <div className="animate-fade-in space-y-8">
+                            
+                             {typeof result.manipulationIndex === 'number' && (
+                                <div>
+                                    <h4 className="text-2xl font-bold text-gray-900 mb-4">분석 요약</h4>
+                                    <ScoreIndicator score={result.manipulationIndex} />
+                                </div>
+                            )}
+
                             <div>
                                 <h4 className="text-2xl font-bold text-gray-900 mb-4">감지된 숨은 의도 유형</h4>
                                 {result.analysis.length > 0 ? (
@@ -166,15 +233,15 @@ const TextAnalyzer: React.FC = () => {
                                 </h4>
                                 <div className="bg-white p-6 rounded-lg border border-gray-200 text-xl space-y-6">
                                   <div className="border-b border-gray-200 pb-4">
-                                      <h5 className="font-bold text-gray-800 text-xl mb-2">요약: 핵심 의도</h5>
+                                      <h5 className="font-bold text-gray-800 text-xl mb-2">핵심 의도 분석</h5>
                                       <FormattedText text={result.comprehensiveAnalysis.summary} className="text-gray-800 leading-relaxed"/>
                                   </div>
                                   <div className="border-b border-gray-200 pb-4">
-                                      <h5 className="font-bold text-gray-800 text-xl mb-2">분석: 주요 설득 전략</h5>
+                                      <h5 className="font-bold text-gray-800 text-xl mb-2">주요 설득 전략</h5>
                                       <FormattedText text={result.comprehensiveAnalysis.tactics} className="text-gray-800 leading-relaxed"/>
                                   </div>
                                   <div>
-                                      <h5 className="font-bold text-gray-800 text-xl mb-2">조언: 비판적으로 읽기</h5>
+                                      <h5 className="font-bold text-gray-800 text-xl mb-2">비판적 사고를 위한 제언</h5>
                                       <FormattedText text={result.comprehensiveAnalysis.advice} className="text-gray-800 leading-relaxed"/>
                                   </div>
                                 </div>
