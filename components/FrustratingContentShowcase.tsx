@@ -4,12 +4,11 @@ interface ExampleCardProps {
   title: string;
   content: string[];
   icon: React.ReactNode;
-  rotation: string;
 }
 
-const ExampleCard: React.FC<ExampleCardProps> = ({ title, content, icon, rotation }) => {
+const ExampleCard: React.FC<ExampleCardProps> = ({ title, content, icon }) => {
   return (
-    <div className={`bg-white rounded-xl border border-gray-200 shadow-xl p-6 w-full max-w-md mx-auto transform transition-transform duration-300 hover:scale-105 ${rotation}`}>
+    <div className="bg-white rounded-xl border border-gray-200 shadow-lg p-6 w-full max-w-md mx-auto transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
       <div className="flex-grow">
         <div className="flex items-start space-x-4 mb-4">
             <div className="flex-shrink-0 text-gray-400 mt-1">{icon}</div>
@@ -33,7 +32,7 @@ interface ExampleDisplayProps {
 const ExampleDisplay: React.FC<ExampleDisplayProps> = ({ title, description, children, layout = 'right' }) => (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center">
         <div className={`space-y-4 ${layout === 'left' ? 'lg:order-last' : ''}`}>
-            <h3 className="text-3xl lg:text-4xl font-bold text-gray-900 leading-snug">
+            <h3 className="text-3xl lg:text-4xl font-bold text-gray-900 leading-relaxed">
                 {title}
             </h3>
             <p className="text-xl text-gray-600 leading-relaxed">
@@ -61,7 +60,6 @@ const FrustratingContentShowcase: React.FC = () => {
                     "지금 신청하지 않으면 평생 후회할 마지막 기회!"
                 ],
                 icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01" /></svg>,
-                rotation: '-rotate-3',
             }
         },
         {
@@ -77,7 +75,6 @@ const FrustratingContentShowcase: React.FC = () => {
                     "순수한 우리들의 가치를 지키기 위해 지금 당장 행동해야 합니다."
                 ],
                 icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>,
-                rotation: 'rotate-2',
             }
         },
         {
@@ -93,7 +90,6 @@ const FrustratingContentShowcase: React.FC = () => {
                     "이것 하나만 끊어도 모든 병이 사라집니다. 지금 바로 확인하세요."
                 ],
                 icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>,
-                rotation: '-rotate-2',
             }
         }
     ];
@@ -101,7 +97,7 @@ const FrustratingContentShowcase: React.FC = () => {
   return (
     <div className="bg-gray-100/50 p-8 md:p-12 rounded-2xl border border-gray-200 animate-fade-in">
         <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 leading-snug mb-4">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 leading-relaxed mb-4">
                 혹시, 이런 글 때문에 불편하셨나요?
             </h2>
             <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
@@ -116,7 +112,6 @@ const FrustratingContentShowcase: React.FC = () => {
                         title={example.card.title}
                         content={example.card.content}
                         icon={example.card.icon}
-                        rotation={example.card.rotation}
                     />
                 </ExampleDisplay>
             ))}

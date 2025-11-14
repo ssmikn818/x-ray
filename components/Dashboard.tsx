@@ -74,7 +74,7 @@ interface FeatureShowcaseProps {
 const FeatureShowcase: React.FC<FeatureShowcaseProps> = ({ title, description, children, imageSide = 'right' }) => (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16 items-center">
         <div className={`space-y-4 ${imageSide === 'left' ? 'lg:order-last' : ''}`}>
-            <h3 className="text-3xl lg:text-4xl font-bold text-gray-900 leading-snug">
+            <h3 className="text-3xl lg:text-4xl font-bold text-gray-900 leading-relaxed">
                 {title}
             </h3>
             <p className="text-xl text-gray-600 leading-relaxed">
@@ -153,7 +153,7 @@ const Dashboard: React.FC = () => {
             <div id="roadmap" className="py-16 md:py-24 bg-gradient-to-br from-purple-100 via-blue-100 to-green-100">
                 <div className="container mx-auto px-4 md:px-8">
                     <div className="text-center mb-16 md:mb-20">
-                        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 leading-snug mb-4">
+                        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 leading-relaxed mb-4">
                             더 강력해질 X-Ray를 만나보세요
                         </h2>
                         <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">

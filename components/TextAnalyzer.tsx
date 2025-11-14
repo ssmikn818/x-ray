@@ -1,6 +1,6 @@
 
 
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { analyzeText, type AnalysisResult } from '../services/geminiService';
 import { NARRATIVE_FRAMES } from '../constants';
@@ -300,7 +300,22 @@ const AntidoteSection: React.FC<{ content: string }> = ({ content }) => {
 
 const AnalysisReport: React.FC<{ result: AnalysisResult; originalText: string; }> = ({ result, originalText }) => {
     if (!result) return null;
+    
+    const isUrlAnalysis = useMemo(() => {
+        const trimmedText = originalText.trim();
+        // A simple regex check for http:// or https:// at the start of the string.
+        return /^https?:\/\//.test(trimmedText);
+    }, [originalText]);
+
     const [activeTab, setActiveTab] = useState('report');
+
+    // If the input changes to a URL and the source tab was active, switch to the report tab.
+    useEffect(() => {
+        if (isUrlAnalysis && activeTab === 'source') {
+            setActiveTab('report');
+        }
+    }, [isUrlAnalysis, activeTab]);
+
 
     const TabButton: React.FC<{ tabName: string; label: string; }> = ({ tabName, label }) => (
         <button
@@ -335,7 +350,7 @@ const AnalysisReport: React.FC<{ result: AnalysisResult; originalText: string; }
             <div className="border-b border-gray-200">
                 <nav className="flex space-x-2 justify-center" aria-label="Tabs">
                     <TabButton tabName="report" label="종합 리포트" />
-                    <TabButton tabName="source" label="X-Ray 하이라이트" />
+                    {!isUrlAnalysis && <TabButton tabName="source" label="X-Ray 하이라이트" />}
                 </nav>
             </div>
             
@@ -378,7 +393,7 @@ const AnalysisReport: React.FC<{ result: AnalysisResult; originalText: string; }
                         )}
                     </div>
                  )}
-                 {activeTab === 'source' && (
+                 {activeTab === 'source' && !isUrlAnalysis && (
                     <div className="animate-fade-in space-y-4">
                         <p className="text-center text-gray-500">원본 텍스트에서 AI가 탐지한 숨은 의도 유형들을 확인해보세요. 하이라이트된 부분에 마우스를 올리면 AI의 분석 내용을 볼 수 있습니다.</p>
                         <HighlightedText originalText={originalText} analysis={result.analysis} />
