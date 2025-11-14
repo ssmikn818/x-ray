@@ -1,7 +1,12 @@
+
 import React, { useState, useMemo } from 'react';
 import { analyzeText, type AnalysisResult } from '../services/geminiService';
 import { NARRATIVE_FRAMES } from '../constants';
-import { NarrativeFrameId } from '../types';
+import { NarrativeFrameId, NarrativeFrame } from '../types';
+
+function escapeRegExp(string: string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}
 
 const FormattedText: React.FC<{ text: string; className?: string }> = ({ text, className }) => {
     const renderBlocks = useMemo(() => {
@@ -26,7 +31,7 @@ const FormattedText: React.FC<{ text: string; className?: string }> = ({ text, c
                 const segments = content.split(/(\*\*.*?\*\*|__.*?__)/g).filter(Boolean);
                 const renderedSegments = segments.map((segment, segIndex) => {
                      if (segment.startsWith('**') && segment.endsWith('**')) {
-                        return <strong key={segIndex} className="font-bold text-gray-900">{segment.slice(2, -2)}</strong>;
+                        return <strong key={segIndex} className="font-bold text-inherit">{segment.slice(2, -2)}</strong>;
                     }
                     if (segment.startsWith('__') && segment.endsWith('__')) {
                         return <u key={segIndex}>{segment.slice(2, -2)}</u>;
@@ -45,7 +50,7 @@ const FormattedText: React.FC<{ text: string; className?: string }> = ({ text, c
                     const segments = line.split(/(\*\*.*?\*\*|__.*?__)/g).filter(Boolean);
                     const renderedSegments = segments.map((segment, segIndex) => {
                         if (segment.startsWith('**') && segment.endsWith('**')) {
-                            return <strong key={segIndex} className="font-bold text-gray-900">{segment.slice(2, -2)}</strong>;
+                            return <strong key={segIndex} className="font-bold text-inherit">{segment.slice(2, -2)}</strong>;
                         }
                         if (segment.startsWith('__') && segment.endsWith('__')) {
                             return <u key={segIndex}>{segment.slice(2, -2)}</u>;
@@ -65,111 +70,296 @@ const FormattedText: React.FC<{ text: string; className?: string }> = ({ text, c
     return <div className={className}>{renderBlocks}</div>;
 };
 
+// --- START: New Analysis Report Components ---
 
-interface ResultCardProps {
-    frameId: NarrativeFrameId;
-    score: number;
-    explanation: string;
-}
+const Tooltip: React.FC<{ children: React.ReactNode; text: string; className?: string }> = ({ children, text, className }) => {
+    const [show, setShow] = useState(false);
+    return (
+        <span className="relative inline-block" onMouseEnter={() => setShow(true)} onMouseLeave={() => setShow(false)}>
+            {children}
+            {show && (
+                <div className={`absolute z-20 bottom-full mb-2 w-72 p-3 text-sm font-medium text-white bg-gray-800 rounded-lg shadow-lg -translate-x-1/2 left-1/2 pointer-events-none ${className}`}>
+                    {text}
+                    <svg className="absolute text-gray-800 h-2 w-full left-0 top-full" x="0px" y="0px" viewBox="0 0 255 255"><polygon className="fill-current" points="0,0 127.5,127.5 255,0"/></svg>
+                </div>
+            )}
+        </span>
+    );
+};
 
-const ResultCard: React.FC<ResultCardProps> = ({ frameId, score, explanation }) => {
-    const frame = NARRATIVE_FRAMES[frameId];
-    if (!frame) return null;
+const HighlightedText: React.FC<{ originalText: string; analysis: AnalysisResult['analysis']; }> = ({ originalText, analysis }) => {
+    const highlights = useMemo(() => {
+        const allSpans: { text: string; frame: NarrativeFrame; explanation: string }[] = [];
+        analysis.forEach(item => {
+            const frame = NARRATIVE_FRAMES[item.frameId];
+            if (frame && item.evidence_spans) {
+                item.evidence_spans.forEach(span => {
+                    if(span.trim() !== '') {
+                        allSpans.push({ text: span, frame, explanation: item.explanation });
+                    }
+                });
+            }
+        });
+        // Remove duplicates to avoid issues with splitting, prioritizing longer spans
+        const uniqueSpans = Array.from(new Map(allSpans.sort((a,b) => b.text.length - a.text.length).map(item => [item.text, item])).values());
+        return uniqueSpans;
+    }, [analysis]);
 
-    const scoreColor = score > 70 ? 'text-red-500' : score > 40 ? 'text-amber-500' : 'text-green-600';
+    if (highlights.length === 0) {
+        return <p className="text-lg leading-relaxed whitespace-pre-wrap bg-gray-100 text-gray-800 p-6 rounded-xl">{originalText}</p>;
+    }
     
-    const textColorClass = useMemo(() => {
-        switch(frameId) {
-            case NarrativeFrameId.UsVsThem: return 'text-indigo-600';
-            case NarrativeFrameId.FearMongering: return 'text-purple-600';
-            case NarrativeFrameId.Scapegoating: return 'text-amber-600';
-            case NarrativeFrameId.PastGlory: return 'text-teal-600';
-            case NarrativeFrameId.ThreatToValues: return 'text-rose-600';
-            case NarrativeFrameId.ExaggeratedPromises: return 'text-yellow-500';
-            case NarrativeFrameId.UrgencyFomo: return 'text-orange-600';
-            default: return 'text-gray-800';
-        }
-    }, [frameId]);
-
+    const regex = new RegExp(`(${highlights.map(h => escapeRegExp(h.text)).join('|')})`, 'g');
+    const parts = originalText.split(regex).filter(part => part);
 
     return (
-        <div className="bg-white p-5 rounded-xl border border-gray-200/80 shadow-sm transition-all hover:shadow-md">
-            <div className="flex items-center space-x-3 mb-3">
-                <div className={`flex-shrink-0 p-2 rounded-lg ${frame.color} bg-opacity-20 ${textColorClass}`}>
-                    {React.cloneElement(frame.icon, { className: 'h-6 w-6' })}
-                </div>
-                <h6 className={`font-bold text-xl ${textColorClass}`}>{frame.name}</h6>
-                <span className={`font-mono font-bold text-xl ml-auto ${scoreColor}`}>{score}점</span>
-            </div>
-            <div className="space-y-3 text-xl">
-                 <FormattedText text={explanation} className="text-gray-700 leading-relaxed"/>
-                 <p className="text-gray-500 text-base border-t border-gray-200 pt-3 mt-4 leading-relaxed">
-                     💡 {frame.description}
-                 </p>
-            </div>
+        <div className="text-lg leading-relaxed whitespace-pre-wrap bg-gray-100 text-gray-800 p-6 rounded-xl border border-gray-200 max-h-[500px] overflow-y-auto">
+            {parts.map((part, index) => {
+                const highlight = highlights.find(h => h.text === part);
+                if (highlight) {
+                    return (
+                        <Tooltip key={index} text={highlight.explanation}>
+                            <mark
+                                className="px-1 py-0.5 rounded-md cursor-pointer"
+                                style={{ backgroundColor: `${highlight.frame.hexColor}50` }} // 31% opacity for better visibility
+                            >
+                                {part}
+                            </mark>
+                        </Tooltip>
+                    );
+                }
+                return <span key={index}>{part}</span>;
+            })}
         </div>
     );
 };
 
-interface AnalysisSummaryProps {
-  score: number;
-  genre: string;
-  intentionSummary: string;
-}
 
-const AnalysisSummary: React.FC<AnalysisSummaryProps> = ({ score, genre, intentionSummary }) => {
+const ManipulationIndexGauge: React.FC<{ score: number }> = ({ score }) => {
     const levelInfo = useMemo(() => {
         if (score > 70) {
             return {
-                level: '높음',
-                color: 'bg-red-500',
+                label: '높음',
                 textColor: 'text-red-600',
+                gradient: 'bg-gradient-to-r from-amber-500 to-red-600',
             };
         }
         if (score > 40) {
             return {
-                level: '보통',
-                color: 'bg-amber-500',
+                label: '보통',
                 textColor: 'text-amber-600',
+                gradient: 'bg-gradient-to-r from-green-500 to-amber-500',
             };
         }
         return {
-            level: '낮음',
-            color: 'bg-green-600',
-            textColor: 'text-green-700',
+            label: '낮음',
+            textColor: 'text-green-600',
+            gradient: 'bg-green-500',
         };
     }, [score]);
-    
+
     return (
-        <div className="p-6 bg-white rounded-xl border border-gray-200">
-            <h5 className="font-bold text-gray-800 text-xl mb-4 text-center">종합 분석 요약</h5>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
-                 {/* Left side: Level */}
-                <div className="text-center bg-gray-50 p-4 rounded-lg border border-gray-200 h-full flex flex-col justify-center">
-                     <p className="text-gray-500 text-base">숨은 의도 강도</p>
-                     <p className={`mt-1 font-bold text-3xl ${levelInfo.textColor}`}>{levelInfo.level}</p>
+         <div className="bg-gray-100 p-5 rounded-xl border border-gray-200">
+            <div className="flex justify-between items-end mb-2">
+                <span className="text-gray-600 font-medium">조작 가능성</span>
+                <div>
+                    <span className={`font-bold text-4xl ${levelInfo.textColor}`}>{score}</span>
+                    <span className="text-gray-700 font-semibold ml-1"> / 100</span>
                 </div>
-                {/* Middle side: Intention */}
-                 <div className="text-center bg-gray-50 p-4 rounded-lg border border-gray-200 h-full flex flex-col justify-center">
-                     <p className="font-semibold text-gray-500 text-base">AI가 판단한 핵심 의도</p>
-                     <p className={`px-3 py-1 mt-1 text-xl font-bold text-white rounded-full inline-block ${levelInfo.color}`}>{intentionSummary || '분석 중...'}</p>
-                 </div>
-                 {/* Right side: Genre */}
-                 <div className="text-center bg-gray-50 p-4 rounded-lg border border-gray-200 h-full flex flex-col justify-center">
-                     <p className="font-semibold text-gray-500 text-base">글의 유형</p>
-                     <p className="font-bold text-blue-600 text-3xl mt-1">{genre}</p>
-                 </div>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-3.5 mt-5 overflow-hidden">
-                <div className={`${levelInfo.color} h-3.5 rounded-full transition-all duration-500`} style={{ width: `${score}%` }}></div>
+            <div className="w-full bg-gray-200 rounded-full h-3.5 overflow-hidden">
+                <div className={`${levelInfo.gradient} h-3.5 rounded-full transition-all duration-500`} style={{ width: `${score}%` }}></div>
+            </div>
+            <p className={`text-right mt-2 font-semibold text-lg ${levelInfo.textColor}`}>{levelInfo.label}</p>
+        </div>
+    );
+};
+
+const DetectedFrameItem: React.FC<{ frameId: NarrativeFrameId; score: number; explanation: string; }> = ({ frameId, score, explanation }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const frame = NARRATIVE_FRAMES[frameId];
+    if (!frame) return null;
+
+    const level = useMemo(() => {
+        if (score > 70) return { label: '높음', color: 'text-red-600', barColor: 'bg-red-500' };
+        if (score > 40) return { label: '보통', color: 'text-amber-600', barColor: 'bg-amber-500' };
+        return { label: '낮음', color: 'text-blue-600', barColor: 'bg-blue-500' };
+    }, [score]);
+
+    return (
+        <div className="border border-gray-200 rounded-lg overflow-hidden bg-white transition-shadow hover:shadow-md hover:border-gray-300">
+            <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="w-full flex items-center p-4 text-left focus:outline-none"
+                aria-expanded={isOpen}
+            >
+                <div className="flex items-center space-x-3 flex-shrink-0 w-[140px] md:w-[160px]">
+                    <div className={`${frame.color} bg-opacity-20 p-2 rounded-md`}>
+                        {React.cloneElement(frame.icon, { className: 'h-5 w-5', style: { color: frame.hexColor } })}
+                    </div>
+                    <span className="font-semibold text-gray-800">{frame.name}</span>
+                </div>
+                <div className="flex-grow flex items-center mx-4">
+                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                        <div className={`${level.barColor} h-2.5 rounded-full`} style={{ width: `${score}%` }}></div>
+                    </div>
+                </div>
+                <div className="flex items-center w-[100px] md:w-[120px] justify-end">
+                    <span className={`font-semibold w-12 text-center ${level.color}`}>{level.label}</span>
+                    <span className="font-mono font-bold text-gray-800 w-12 text-right">{score}%</span>
+                     <svg className={`w-5 h-5 ml-3 text-gray-500 transform transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                </div>
+            </button>
+            {isOpen && (
+                <div className="p-5 bg-gray-50 border-t border-gray-200 animate-fade-in">
+                    <p className="text-gray-600 text-sm mb-2 border-b border-gray-200 pb-2 font-semibold">AI의 판단 근거:</p>
+                    <FormattedText text={explanation} className="text-gray-700 leading-relaxed" />
+                </div>
+            )}
+        </div>
+    );
+};
+
+const AntidoteSection: React.FC<{ content: string }> = ({ content }) => {
+    const questionBlocks = useMemo(() => {
+        if (!content) return [];
+        return content.split(/\n\s*\n/).map(block => {
+            const lines = block.split('\n').filter(line => line.trim() !== '');
+            if (lines.length === 0) return null;
+            const question = lines[0];
+            const thoughtPoints = lines.slice(1).map(line => line.trim().replace(/^- /, ''));
+            return { question, thoughtPoints };
+        }).filter((item): item is { question: string; thoughtPoints: string[] } => item !== null);
+    }, [content]);
+
+
+    if (questionBlocks.length === 0) {
+        return null;
+    }
+
+    return (
+        <div>
+            <h4 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+                '해독제': 생각해볼 지점
+            </h4>
+            <div className="space-y-5">
+                {questionBlocks.map((block, index) => (
+                    <div key={index} className="bg-blue-50/50 border border-blue-200/60 rounded-xl p-5">
+                        <div className="flex items-start">
+                             <span className="text-2xl mr-4 mt-[-2px]" aria-hidden="true">🧐</span>
+                            <div className="flex-1">
+                                <p className="text-lg font-semibold text-gray-800 mb-4">
+                                    <FormattedText text={block.question} />
+                                </p>
+                                <div className="flex flex-wrap gap-3">
+                                    {block.thoughtPoints.map((point, pIndex) => (
+                                        <div key={pIndex} className="bg-white text-gray-700 px-4 py-2 rounded-lg border border-gray-300 text-base">
+                                            <FormattedText text={point} />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                ))}
             </div>
         </div>
     );
 };
 
 
+const AnalysisReport: React.FC<{ result: AnalysisResult; originalText: string; }> = ({ result, originalText }) => {
+    if (!result) return null;
+    const [activeTab, setActiveTab] = useState('report');
+
+    const TabButton: React.FC<{ tabName: string; label: string; }> = ({ tabName, label }) => (
+        <button
+            onClick={() => setActiveTab(tabName)}
+            className={`px-6 py-3 text-lg font-bold rounded-t-lg transition-colors duration-200 focus:outline-none -mb-px ${
+                activeTab === tabName
+                ? 'bg-white border-gray-200 border-t border-x text-blue-600'
+                : 'bg-transparent text-gray-500 hover:text-gray-700 border-b border-gray-200'
+            }`}
+        >
+            {label}
+        </button>
+    );
+
+    return (
+        <div className="animate-fade-in space-y-6">
+             <div className="text-center">
+                <h3 className="text-base font-semibold text-blue-600 tracking-wider">AI 분석 리포트</h3>
+                <p className="text-4xl font-bold text-gray-900 mt-2">{result.intentionSummary}</p>
+                <p className="text-lg text-gray-600 mt-1.5">이 글의 장르는 '{result.genre}'(으)로 판단됩니다.</p>
+            </div>
+
+            <div className="border-b border-gray-200">
+                <nav className="flex space-x-2 justify-center" aria-label="Tabs">
+                    <TabButton tabName="report" label="종합 리포트" />
+                    <TabButton tabName="source" label="X-Ray 하이라이트" />
+                </nav>
+            </div>
+            
+            <div className="bg-white p-6 md:p-8 rounded-b-2xl border border-gray-200 shadow-lg">
+                 {activeTab === 'report' && (
+                    <div className="animate-fade-in space-y-8">
+                        <div>
+                            <h4 className="text-2xl font-bold text-gray-800 mb-4 text-center">숨은 의도 강도 (조작 지수)</h4>
+                            <ManipulationIndexGauge score={result.manipulationIndex} />
+                        </div>
+                        <div>
+                            <h4 className="text-2xl font-bold text-gray-800 mb-4 flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 mr-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                <span>내러티브 성분 분석표</span>
+                            </h4>
+                            {result.analysis.length > 0 ? (
+                                <div className="space-y-3">
+                                    {result.analysis
+                                        .sort((a, b) => b.score - a.score)
+                                        .map((item) => <DetectedFrameItem key={item.frameId} {...item} />
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="text-center p-6 bg-gray-100 rounded-lg border border-gray-200">
+                                    <p className="text-gray-800 text-lg">특별히 감지된 숨은 의도 유형이 없습니다.</p>
+                                    <p className="text-gray-600 mt-1">이 글은 중립적이거나 논리적 근거에 기반한 주장일 수 있습니다.</p>
+                                </div>
+                            )}
+                        </div>
+                        {result.comprehensiveAnalysis && (
+                            <div className="space-y-6">
+                                <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                                    <h5 className="font-bold text-gray-800 text-xl mb-3 flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                                        <span>AI 종합 분석</span>
+                                    </h5>
+                                    <div className="space-y-4 text-lg text-gray-700 leading-relaxed">
+                                        <FormattedText text={result.comprehensiveAnalysis.summary} />
+                                        <FormattedText text={result.comprehensiveAnalysis.tactics} />
+                                    </div>
+                                </div>
+                                <AntidoteSection content={result.comprehensiveAnalysis.criticalQuestions} />
+                            </div>
+                        )}
+                    </div>
+                 )}
+                 {activeTab === 'source' && (
+                    <div className="animate-fade-in space-y-4">
+                        <p className="text-center text-gray-500">원본 텍스트에서 AI가 탐지한 숨은 의도 유형들을 확인해보세요. 하이라이트된 부분에 마우스를 올리면 AI의 분석 내용을 볼 수 있습니다.</p>
+                        <HighlightedText originalText={originalText} analysis={result.analysis} />
+                    </div>
+                 )}
+            </div>
+        </div>
+    );
+};
+
+// --- END: New Analysis Report Components ---
+
 const TextAnalyzer: React.FC = () => {
-    const [text, setText] = useState('');
+    const [text, setText] = useState('더불어민주당 이재명 대표가 오는 10월 \'위증 교사\' 혐의 1심 재판에서 유죄를 선고받을 경우 당대표직에서 사퇴해야 한다는 주장이 25일 여권에서 나왔다. 국민의힘 조강특위 위원인 김종혁 조직부총장은 이날 YTN 라디오에서 "이 대표가 1심에서 유죄가 나오면 당대표직을 그만둬야 한다"며 "그렇지 않으면 민주당은 \'이재명 방탄 정당\' \'이재명 사당(私黨)\'이라는 비판에서 벗어날 수 없다"고 했다. 이 대표의 위증 교사 혐의 재판은 오는 10월 1심 선고가 나올 가능성이 있다. 이 대표는 2018년 12월 김씨에게 여러 차례 전화해 \'김병량 전 성남시장과 KBS는 나를 주범으로 몰았다\'는 취지로 허위 증언을 해달라고 요구한 혐의를 받는다.');
     const [isLoading, setIsLoading] = useState(false);
     const [result, setResult] = useState<AnalysisResult | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -195,14 +385,15 @@ const TextAnalyzer: React.FC = () => {
 
     return (
         <div className="bg-white p-6 md:p-8 rounded-2xl border border-gray-200 shadow-lg transition-all duration-500">
-            <h3 className="text-3xl font-semibold mb-6 text-gray-800 text-center">실시간 의도 분석</h3>
+            <h3 className="text-3xl font-semibold mb-2 text-gray-800 text-center">실시간 의도 분석</h3>
+            <p className="text-lg text-gray-500 text-center mb-6">콘텐츠 URL을 붙여넣거나, 분석하고 싶은 텍스트를 직접 입력해주세요.</p>
             <div className="flex flex-col gap-8">
                 {/* Top Section: Input */}
                 <div className="space-y-4">
                     <textarea
                         value={text}
                         onChange={(e) => setText(e.target.value)}
-                        placeholder="여기에 분석하고 싶은 글을 붙여넣으세요. (뉴스 기사, 댓글, SNS 게시물 등)"
+                        placeholder="분석하고 싶은 콘텐츠 주소(URL)나 텍스트를 여기에 붙여넣으세요."
                         className="w-full h-72 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 text-lg resize-y bg-gray-50/50 leading-relaxed"
                         disabled={isLoading}
                         rows={12}
@@ -231,57 +422,7 @@ const TextAnalyzer: React.FC = () => {
                             <div className="p-4 bg-red-50 text-red-700 border border-red-200 rounded-lg">{error}</div>
                         </div>
                     ) : result ? (
-                        <div className="animate-fade-in space-y-8">
-                            
-                             {typeof result.manipulationIndex === 'number' && (
-                                <div>
-                                    <h4 className="text-2xl font-bold text-gray-900 mb-4">분석 요약</h4>
-                                    <AnalysisSummary score={result.manipulationIndex} genre={result.genre} intentionSummary={result.intentionSummary}/>
-                                </div>
-                            )}
-
-                            <div>
-                                <h4 className="text-2xl font-bold text-gray-900 mb-4">감지된 숨은 의도 유형</h4>
-                                {result.analysis.length > 0 ? (
-                                    <div className="space-y-4">
-                                        {result.analysis
-                                            .sort((a, b) => b.score - a.score)
-                                            .map((item) => <ResultCard key={item.frameId} {...item} />
-                                        )}
-                                    </div>
-                                ) : (
-                                    <div className="text-center p-6 bg-white rounded-lg border">
-                                        <p className="text-gray-600 text-lg">특별히 감지된 숨은 의도 유형이 없습니다.</p>
-                                        <p className="text-gray-500 mt-1">이 글은 중립적이거나 논리적 근거에 기반한 주장일 수 있습니다.</p>
-                                    </div>
-                                )}
-                            </div>
-                            
-                            {result.comprehensiveAnalysis && (
-                            <div>
-                                <h4 className="text-2xl font-bold text-gray-900 mb-3 flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                    </svg>
-                                    <span>AI 종합 분석 리포트</span>
-                                </h4>
-                                <div className="bg-white p-6 rounded-lg border border-gray-200 text-xl space-y-6">
-                                  <div className="border-b border-gray-200 pb-4">
-                                      <h5 className="font-bold text-gray-800 text-xl mb-2">핵심 의도 분석</h5>
-                                      <FormattedText text={result.comprehensiveAnalysis.summary} className="text-gray-800 leading-relaxed"/>
-                                  </div>
-                                  <div className="border-b border-gray-200 pb-4">
-                                      <h5 className="font-bold text-gray-800 text-xl mb-2">주요 설득 전략</h5>
-                                      <FormattedText text={result.comprehensiveAnalysis.tactics} className="text-gray-800 leading-relaxed"/>
-                                  </div>
-                                  <div>
-                                      <h5 className="font-bold text-gray-800 text-xl mb-2">비판적 사고를 위한 제언</h5>
-                                      <FormattedText text={result.comprehensiveAnalysis.advice} className="text-gray-800 leading-relaxed"/>
-                                  </div>
-                                </div>
-                            </div>
-                            )}
-                        </div>
+                        <AnalysisReport result={result} originalText={text} />
                     ) : (
                          <div className="flex flex-col items-center justify-center h-full text-center text-gray-500">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>

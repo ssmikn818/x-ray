@@ -63,25 +63,26 @@ const FaqItem: React.FC<{ q: string; a: string }> = ({ q, a }) => {
   );
 };
 
-
 const Dashboard: React.FC = () => {
     const [activeTab, setActiveTab] = useState<FaqCategory>('서비스 이용');
-
+    
     return (
-        <section id="features" className="py-12 md:py-20">
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-100 p-8 md:p-12 rounded-2xl border border-gray-200 shadow-lg text-center">
+        <section id="features" className="py-12 md:py-20 space-y-24">
+            {/* 출시 예정 기능 섹션 - 심플 버전 */}
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-100 p-8 md:p-12 rounded-2xl text-center border border-blue-200/50">
                 <h2 className="text-4xl md:text-5xl font-bold text-gray-900 leading-snug mb-4">
                     더 강력해질 X-Ray를 만나보세요
                 </h2>
                 <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed mb-8">
-                    정식 버전에서는 텍스트 분석을 넘어, 당신의 미디어 소비 패턴 전체를 진단하고 코칭하는 개인 비서로 발전할 예정입니다. 새로운 기능이 준비되면 가장 먼저 알려드릴게요.
+                    현재는 텍스트 분석에 집중하고 있지만, 곧 이미지와 영상 콘텐츠, 웹페이지 URL 직접 분석 기능이 추가될 예정입니다. X-Ray의 발전을 가장 먼저 확인하세요!
                 </p>
-                <button className="px-8 py-4 bg-blue-600 text-white font-bold rounded-lg transition-transform hover:scale-105 duration-300 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-xl">
+                <button className="px-8 py-3 bg-blue-600 text-white font-bold rounded-lg transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-xl">
                     출시 알림 신청하기
                 </button>
             </div>
 
-            <div id="faq" className="max-w-4xl mx-auto mt-24">
+            {/* FAQ 섹션 */}
+            <div id="faq" className="max-w-4xl mx-auto">
                 <h2 className="text-4xl font-bold text-center text-gray-900 mb-12">자주 묻는 질문 (FAQ)</h2>
 
                 <div className="flex justify-center border-b border-gray-200 mb-6 space-x-2 md:space-x-4">
