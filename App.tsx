@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Header from './components/Header';
 import Dashboard from './components/Dashboard';
 import OnboardingModal from './components/OnboardingModal';
@@ -39,13 +39,13 @@ const App: React.FC = () => {
           <TextAnalyzer />
         </div>
 
-        <div className="mb-12">
+        <section id="showcase" className="mb-12 scroll-mt-24">
           <FrustratingContentShowcase />
-        </div>
+        </section>
 
-        <div className="mb-24">
+        <section id="value-prop" className="mb-24 scroll-mt-24">
             <ValueProposition />
-        </div>
+        </section>
 
         <Dashboard />
       </main>

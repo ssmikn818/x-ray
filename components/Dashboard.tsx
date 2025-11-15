@@ -150,7 +150,7 @@ const Dashboard: React.FC = () => {
     return (
         <section id="features">
             {/* 출시 예정 기능 섹션 - 확장 버전 */}
-            <div id="roadmap" className="py-16 md:py-24 bg-gradient-to-br from-purple-100 via-blue-100 to-green-100">
+            <div id="roadmap" className="py-16 md:py-24 bg-gradient-to-br from-purple-100 via-blue-100 to-green-100 scroll-mt-24">
                 <div className="container mx-auto px-4 md:px-8">
                     <div className="text-center mb-16 md:mb-20">
                         <h2 className="text-4xl md:text-5xl font-bold text-gray-900 leading-relaxed mb-4">
@@ -194,7 +194,7 @@ const Dashboard: React.FC = () => {
             </div>
 
             {/* FAQ 섹션 */}
-            <div id="faq" className="max-w-4xl mx-auto pt-24 pb-12 md:py-20">
+            <div id="faq" className="max-w-4xl mx-auto pt-24 pb-12 md:py-20 scroll-mt-24">
                 <h2 className="text-4xl font-bold text-center text-gray-900 mb-12">자주 묻는 질문 (FAQ)</h2>
 
                 <div className="flex justify-center border-b border-gray-200 mb-6 space-x-2 md:space-x-4">
