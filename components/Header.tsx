@@ -15,8 +15,9 @@ const Header: React.FC = () => {
         </div>
 
         <div className="hidden lg:flex items-center">
-            <button className="px-6 py-2 bg-blue-600 text-white font-bold rounded-lg transition-colors duration-300 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-base">
-                출시 알림 신청
+            <button className="px-6 py-2 bg-gray-900 text-white font-bold rounded-lg shadow-md transition-all duration-300 hover:bg-gray-800 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 text-base flex items-center gap-2">
+                <span>🚀</span>
+                <span>베타 테스터 신청</span>
             </button>
         </div>
       </div>

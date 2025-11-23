@@ -154,7 +154,7 @@ const Dashboard: React.FC = () => {
                 <div className="container mx-auto px-4 md:px-8">
                     <div className="text-center mb-16 md:mb-20">
                         <h2 className="text-4xl md:text-5xl font-bold text-gray-900 leading-relaxed mb-4">
-                            더 강력해질 X-Ray를 만나보세요
+                            텍스트를 넘어, 세상 모든 콘텐츠를 꿰뚫어 봅니다
                         </h2>
                         <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
                             현재는 텍스트 분석에 집중하고 있지만, 향후 종합적인 미디어 리터러시 솔루션으로 발전해 나갈 계획입니다. X-Ray의 발전을 가장 먼저 확인하세요!
@@ -163,22 +163,22 @@ const Dashboard: React.FC = () => {
                     
                     <div className="max-w-7xl mx-auto space-y-20 md:space-y-28">
                         <FeatureShowcase 
-                            title="이미지와 영상까지, 더 넓어지는 분석"
-                            description="텍스트를 넘어 시각적 콘텐츠에 숨겨진 의도까지 분석합니다. 이미지의 구도, 색감, 영상의 편집 방식 등을 통해 전달되는 미묘한 메시지까지 탐지하여 더 깊이 있는 미디어 분석을 제공할 것입니다."
+                            title="유튜브 썸네일과 영상 속 표정까지 읽어냅니다"
+                            description="텍스트뿐만 아니라, 영상의 편집 방식과 이미지에 숨겨진 미묘한 조작 의도까지 AI가 찾아냅니다."
                             imageSide="right"
                         >
                             <ImageVideoAnalysisMockup />
                         </FeatureShowcase>
                         <FeatureShowcase 
-                            title="실시간 웹 분석, 브라우저 확장 프로그램"
-                            description="지금 보고 있는 뉴스 기사, SNS 피드를 바로 분석하세요. 브라우저 확장 프로그램을 통해 어떤 웹페이지에서든 클릭 한 번으로 X-Ray 분석을 실행하고, 실시간으로 숨은 의도에 대한 경고를 받을 수 있습니다."
+                            title="설치 한 번으로, 인터넷이 안전해집니다"
+                            description="뉴스 기사든 SNS 피드든, 클릭할 필요도 없이 자동으로 분석하고 숨은 의도를 경고해 드립니다."
                             imageSide="left"
                         >
                             <BrowserExtensionMockup />
                         </FeatureShowcase>
                         <FeatureShowcase 
-                            title="당신만을 위한 맞춤형 미디어 리터러시 코칭"
-                            description="나의 미디어 소비 습관을 진단하고, 맞춤형 교육 콘텐츠를 추천받으세요. 어떤 유형의 설득 전략에 취약한지 파악하고, 비판적 사고 능력을 기르기 위한 개인화된 피드백과 훈련을 제공합니다."
+                            title="나도 모르게 선동당하고 있을까? AI가 진단해 드립니다"
+                            description="내가 자주 보는 뉴스나 유튜브 채널을 분석해, 어떤 설득 전략에 약한지 알려드립니다. 복잡한 공부 없이, 나만을 위한 맞춤형 피드백을 받아보세요."
                             imageSide="right"
                         >
                             <PersonalizedCoachingMockup />
@@ -186,8 +186,9 @@ const Dashboard: React.FC = () => {
                     </div>
 
                     <div className="text-center mt-20 md:mt-24">
-                        <button className="px-8 py-3 bg-blue-600 text-white font-bold rounded-lg transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-xl">
-                            출시 알림 신청하기
+                        <button className="px-8 py-3 bg-gray-900 text-white font-bold rounded-lg shadow-lg hover:bg-gray-800 transition-all duration-200 transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 text-xl inline-flex items-center justify-center gap-2">
+                            <span>🚀</span>
+                            <span>내 취약점 진단받기 (사전 예약)</span>
                         </button>
                     </div>
                 </div>

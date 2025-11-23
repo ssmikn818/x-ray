@@ -3,11 +3,12 @@ import React, { useEffect } from 'react';
 interface KakaoShareButtonProps {
   score: number;
   intentionSummary: string;
+  originalText: string;
 }
 
 const KAKAO_API_KEY = "d73cca4966ffe45f74e00f7a32be1755";
 
-const KakaoShareButton: React.FC<KakaoShareButtonProps> = ({ score, intentionSummary }) => {
+const KakaoShareButton: React.FC<KakaoShareButtonProps> = ({ score, intentionSummary, originalText }) => {
   useEffect(() => {
     // Initialize Kakao SDK on mount if available
     if (typeof window !== 'undefined' && window.Kakao) {
@@ -40,12 +41,21 @@ const KakaoShareButton: React.FC<KakaoShareButtonProps> = ({ score, intentionSum
       }
     }
 
-    // 3. Get Current URL dynamically
-    // This ensures the link works in both dev (localhost) and prod environments,
-    // provided the domain is registered in Kakao Developers Console.
-    const currentUrl = window.location.href;
+    // 3. Generate Share URL with Query Params
+    // Use origin + pathname to start with a clean URL, then append params
+    const shareUrl = new URL(window.location.origin + window.location.pathname);
+    shareUrl.searchParams.set('score', score.toString());
+    shareUrl.searchParams.set('intent', intentionSummary);
+    
+    // Encode original text (Safe limit: 1500 chars to avoid URL overflow issues)
+    const truncatedText = originalText.length > 1500 
+        ? originalText.slice(0, 1500) + '...' 
+        : originalText;
+    shareUrl.searchParams.set('text', truncatedText);
 
-    // 3. Send Share Request
+    const finalUrl = shareUrl.toString();
+
+    // 4. Send Share Request
     try {
       window.Kakao.Share.sendDefault({
         objectType: 'feed',
@@ -54,21 +64,21 @@ const KakaoShareButton: React.FC<KakaoShareButtonProps> = ({ score, intentionSum
           description: `핵심 의도: ${intentionSummary}\n\nAI가 분석한 콘텐츠의 숨은 의도를 확인해보세요.`,
           imageUrl: 'https://cdn-icons-png.flaticon.com/512/3075/3075977.png', // Generic Analysis Icon
           link: {
-            mobileWebUrl: currentUrl,
-            webUrl: currentUrl,
+            mobileWebUrl: finalUrl,
+            webUrl: finalUrl,
           },
         },
         buttons: [
           {
             title: '결과 자세히 보기',
             link: {
-              mobileWebUrl: currentUrl,
-              webUrl: currentUrl,
+              mobileWebUrl: finalUrl,
+              webUrl: finalUrl,
             },
           },
         ],
       });
-      console.log("Kakao share request sent using URL:", currentUrl);
+      console.log("Kakao share request sent using URL:", finalUrl);
     } catch (error) {
       console.error("Error sending Kakao share request:", error);
       alert("카카오톡 공유 요청 중 오류가 발생했습니다. 카카오 개발자 센터에 현재 도메인이 등록되어 있는지 확인해주세요.");

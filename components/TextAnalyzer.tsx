@@ -10,6 +10,26 @@ function escapeRegExp(string: string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 }
 
+const LOADING_MESSAGES = [
+    "AI가 돋보기를 닦고 있습니다... 쓱싹쓱싹 🔍",
+    "숨은 의도 찾는 중... 꼭꼭 숨어라 머리카락 보일라 🙈",
+    "이 글의 뼈를 때리는 중입니다... 순살 제조 중 🍗",
+    "라떼는 말이야... 이런 분석 사람이 밤새서 했어 ☕",
+    "팩트가 어디 갔나... 현미경으로 찾는 중 🔬",
+    "어그로 판독기 가동! 삐빅- 🚨",
+    "중요한 건 꺾이지 않는 분석 마음... 💖",
+    "뇌피셜 거름망 설치 중... 아주 촘촘하게! 🕸️",
+    "잠시만요, AI도 내용을 읽고 살짝 어질어질하대요 😵‍💫",
+    "행간을 읽는 중... 근데 줄간격이 너무 넓네요 📏",
+    "선동인지 팩트인지, AI 판사가 입장하고 있습니다 ⚖️",
+    "작성자의 마음속을 들여다보는 중... 엑스레이 촬영 📸",
+    "솔직히 말해서... 저도 이 글 보고 좀 놀랐습니다 🤖",
+    "가짜뉴스 탐지견 출동! 킁킁 🐶",
+    "진실의 방으로... 글을 모시는 중입니다 🚪",
+    "알잘딱깔센으로 분석하고 있습니다 ✨",
+    "이 구역의 팩트 폭격기는 나야 나 ✈️"
+];
+
 const FormattedText: React.FC<{ text: string; className?: string }> = ({ text, className }) => {
     const renderBlocks = useMemo(() => {
         if (!text) return null;
@@ -298,18 +318,21 @@ const AntidoteSection: React.FC<{ content: string }> = ({ content }) => {
 };
 
 
-const AnalysisReport: React.FC<{ result: AnalysisResult; originalText: string; }> = ({ result, originalText }) => {
+const AnalysisReport: React.FC<{ 
+    result: AnalysisResult; 
+    originalText: string; 
+    isSharedMode?: boolean; 
+    onReset?: () => void 
+}> = ({ result, originalText, isSharedMode = false, onReset }) => {
     if (!result) return null;
     
     const isUrlAnalysis = useMemo(() => {
         const trimmedText = originalText.trim();
-        // A simple regex check for http:// or https:// at the start of the string.
         return /^https?:\/\//.test(trimmedText);
     }, [originalText]);
 
     const [activeTab, setActiveTab] = useState('report');
 
-    // If the input changes to a URL and the source tab was active, switch to the report tab.
     useEffect(() => {
         if (isUrlAnalysis && activeTab === 'source') {
             setActiveTab('report');
@@ -332,6 +355,12 @@ const AnalysisReport: React.FC<{ result: AnalysisResult; originalText: string; }
 
     return (
         <div className="animate-fade-in space-y-8">
+            {isSharedMode && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center mb-6">
+                    <p className="text-blue-800 font-medium text-lg">공유받은 분석 결과입니다.</p>
+                </div>
+            )}
+
              <div className="text-center border-b border-gray-200 pb-6 mb-6">
                 <h3 className="text-base font-semibold text-blue-600 tracking-wider uppercase">AI 분석 요약</h3>
                 <h2 className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl leading-tight">
@@ -349,41 +378,51 @@ const AnalysisReport: React.FC<{ result: AnalysisResult; originalText: string; }
                         <ManipulationIndexGauge score={result.manipulationIndex} />
                     </div>
                     <div className="flex flex-col justify-end">
-                        <KakaoShareButton score={result.manipulationIndex} intentionSummary={result.intentionSummary} />
+                        <KakaoShareButton 
+                            score={result.manipulationIndex} 
+                            intentionSummary={result.intentionSummary} 
+                            originalText={originalText}
+                        />
                     </div>
                 </div>
             </div>
 
-            <div className="border-b border-gray-200">
-                <nav className="flex space-x-2 justify-center" aria-label="Tabs">
-                    <TabButton tabName="report" label="종합 리포트" />
-                    {!isUrlAnalysis && <TabButton tabName="source" label="X-Ray 하이라이트" />}
-                </nav>
-            </div>
+            {/* Hide Tabs in Shared Mode because we don't have the full analysis data */}
+            {!isSharedMode && (
+                <div className="border-b border-gray-200">
+                    <nav className="flex space-x-2 justify-center" aria-label="Tabs">
+                        <TabButton tabName="report" label="종합 리포트" />
+                        {!isUrlAnalysis && <TabButton tabName="source" label="X-Ray 하이라이트" />}
+                    </nav>
+                </div>
+            )}
             
-            <div className="bg-white p-6 md:p-8 rounded-b-2xl border border-t-0 border-gray-200 shadow-lg">
+            <div className={`bg-white p-6 md:p-8 rounded-b-2xl border ${!isSharedMode ? 'border-t-0' : 'rounded-t-2xl'} border-gray-200 shadow-lg`}>
                  {activeTab === 'report' && (
                     <div className="animate-fade-in space-y-8">
-                        <div>
-                            <h4 className="text-2xl font-bold text-gray-800 mb-4 flex items-center justify-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 mr-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                                <span>AI가 찾아낸 주요 설득 전략</span>
-                            </h4>
-                            {result.analysis.length > 0 ? (
-                                <div className="space-y-3">
-                                    {result.analysis
-                                        .sort((a, b) => b.score - a.score)
-                                        .map((item) => <DetectedFrameItem key={item.frameId} {...item} />
-                                    )}
-                                </div>
-                            ) : (
-                                <div className="text-center p-6 bg-gray-100 rounded-lg border border-gray-200">
-                                    <p className="text-gray-800 text-lg">특별히 감지된 숨은 의도 유형이 없습니다.</p>
-                                    <p className="text-gray-600 mt-1">이 글은 중립적이거나 논리적 근거에 기반한 주장일 수 있습니다.</p>
-                                </div>
-                            )}
-                        </div>
-                        {result.comprehensiveAnalysis && (
+                        {!isSharedMode && (
+                            <div>
+                                <h4 className="text-2xl font-bold text-gray-800 mb-4 flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 mr-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                    <span>AI가 찾아낸 주요 설득 전략</span>
+                                </h4>
+                                {result.analysis.length > 0 ? (
+                                    <div className="space-y-3">
+                                        {result.analysis
+                                            .sort((a, b) => b.score - a.score)
+                                            .map((item) => <DetectedFrameItem key={item.frameId} {...item} />
+                                        )}
+                                    </div>
+                                ) : (
+                                    <div className="text-center p-6 bg-gray-100 rounded-lg border border-gray-200">
+                                        <p className="text-gray-800 text-lg">특별히 감지된 숨은 의도 유형이 없습니다.</p>
+                                        <p className="text-gray-600 mt-1">이 글은 중립적이거나 논리적 근거에 기반한 주장일 수 있습니다.</p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {result.comprehensiveAnalysis && !isSharedMode && (
                             <div className="space-y-6">
                                 <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
                                     <h5 className="font-bold text-gray-800 text-xl mb-3 flex items-center">
@@ -398,10 +437,37 @@ const AnalysisReport: React.FC<{ result: AnalysisResult; originalText: string; }
                                 <AntidoteSection content={result.comprehensiveAnalysis.criticalQuestions} />
                             </div>
                         )}
-                        <ExtensionReservation />
+
+                        {isSharedMode && (
+                            <div className="space-y-8">
+                                {/* Shared Mode Original Text Display */}
+                                {originalText && (
+                                    <div className="bg-gray-100 p-6 rounded-lg border border-gray-200">
+                                        <h4 className="text-lg font-bold text-gray-800 mb-3">분석된 원본 내용:</h4>
+                                        <div className="whitespace-pre-wrap text-gray-700 text-base leading-relaxed break-words max-h-96 overflow-y-auto">
+                                            {originalText}
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="text-center py-4">
+                                    <p className="text-gray-600 text-lg mb-6">
+                                        상세한 분석 내용과 설득 전략은 직접 분석해보면 확인할 수 있습니다.
+                                    </p>
+                                    <button
+                                        onClick={onReset}
+                                        className="px-8 py-3 bg-blue-600 text-white font-bold rounded-lg shadow-md hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-xl"
+                                    >
+                                        나도 새로 분석하기
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {!isSharedMode && <ExtensionReservation />}
                     </div>
                  )}
-                 {activeTab === 'source' && !isUrlAnalysis && (
+                 {activeTab === 'source' && !isUrlAnalysis && !isSharedMode && (
                     <div className="animate-fade-in space-y-4">
                         <p className="text-center text-gray-500">원본 텍스트에서 AI가 탐지한 숨은 의도 유형들을 확인해보세요. 하이라이트된 부분에 마우스를 올리면 AI의 분석 내용을 볼 수 있습니다.</p>
                         <HighlightedText originalText={originalText} analysis={result.analysis} />
@@ -414,11 +480,62 @@ const AnalysisReport: React.FC<{ result: AnalysisResult; originalText: string; }
 
 // --- END: New Analysis Report Components ---
 
-const TextAnalyzer: React.FC = () => {
+interface TextAnalyzerProps {
+  sharedData?: { score: number; intent: string; text?: string } | null;
+  onClearSharedData?: () => void;
+}
+
+const TextAnalyzer: React.FC<TextAnalyzerProps> = ({ sharedData, onClearSharedData }) => {
     const [text, setText] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [result, setResult] = useState<AnalysisResult | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [isSharedMode, setIsSharedMode] = useState(false);
+    const [loadingMessage, setLoadingMessage] = useState(LOADING_MESSAGES[0]);
+
+    useEffect(() => {
+        if (sharedData) {
+            setIsSharedMode(true);
+            setResult({
+                genre: '공유된 분석 결과',
+                intentionSummary: sharedData.intent,
+                manipulationIndex: sharedData.score,
+                analysis: [], // Details not available from URL params
+                comprehensiveAnalysis: {
+                    summary: '',
+                    tactics: '',
+                    criticalQuestions: ''
+                }
+            });
+            if (sharedData.text) {
+                setText(sharedData.text);
+            }
+        }
+    }, [sharedData]);
+
+    // Effect for rotating loading messages
+    useEffect(() => {
+        // FIX: Replace explicit NodeJS.Timeout with ReturnType<typeof setInterval> to support browser environments.
+        let interval: ReturnType<typeof setInterval> | undefined;
+        if (isLoading) {
+             // Set initial random message
+            setLoadingMessage(LOADING_MESSAGES[Math.floor(Math.random() * LOADING_MESSAGES.length)]);
+
+            interval = setInterval(() => {
+                setLoadingMessage(prev => {
+                    // Pick a random message different from the current one (simple retry logic)
+                    let nextMsg = LOADING_MESSAGES[Math.floor(Math.random() * LOADING_MESSAGES.length)];
+                    while (nextMsg === prev && LOADING_MESSAGES.length > 1) {
+                         nextMsg = LOADING_MESSAGES[Math.floor(Math.random() * LOADING_MESSAGES.length)];
+                    }
+                    return nextMsg;
+                });
+            }, 3000);
+        }
+        return () => {
+            if (interval) clearInterval(interval);
+        };
+    }, [isLoading]);
 
     const handleAnalyze = async () => {
         if (!text.trim()) {
@@ -428,6 +545,7 @@ const TextAnalyzer: React.FC = () => {
         setIsLoading(true);
         setError(null);
         setResult(null);
+        setIsSharedMode(false);
 
         try {
             const analysisResult = await analyzeText(text);
@@ -439,59 +557,85 @@ const TextAnalyzer: React.FC = () => {
         }
     };
 
+    const handleReset = () => {
+        setResult(null);
+        setText('');
+        setIsSharedMode(false);
+        if (onClearSharedData) {
+            onClearSharedData();
+        }
+    };
+
     return (
         <div className="bg-white p-6 md:p-8 rounded-2xl border border-gray-200 shadow-lg transition-all duration-500">
-            <h3 className="text-3xl font-semibold mb-2 text-gray-800 text-center">실시간 의도 분석</h3>
-            <p className="text-lg text-gray-500 text-center mb-6">
-                뉴스 기사, 블로그, SNS 등 분석하고 싶은 글의 텍스트나 URL을 아래에 붙여넣으세요.
-            </p>
-            <div className="flex flex-col gap-8">
-                {/* Top Section: Input */}
-                <div className="space-y-4">
-                    <textarea
-                        value={text}
-                        onChange={(e) => setText(e.target.value)}
-                        placeholder={`여기에 분석할 텍스트 혹은 URL을 입력하세요.\n\n(예시)\n- https://news.kakao.com/v/2024... (뉴스 기사 URL)\n- "3일 만에 수익 1000% 보장!" (광고 문구)\n- "이거 안 사면 평생 후회합니다." (불안감 조성)`}
-                        className="w-full h-72 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 text-lg resize-y bg-gray-50/50 leading-relaxed placeholder-gray-400"
-                        disabled={isLoading}
-                        rows={12}
-                    />
-                    <button
-                        onClick={handleAnalyze}
-                        disabled={isLoading || !text.trim()}
-                        className="w-full px-6 py-4 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed text-xl"
-                    >
-                        {isLoading ? '분석 중...' : '숨은 의도 분석하기'}
-                    </button>
-                </div>
+            {!isSharedMode && (
+                <>
+                    <h3 className="text-3xl font-semibold mb-2 text-gray-800 text-center">실시간 의도 분석</h3>
+                    <p className="text-lg text-gray-500 text-center mb-6">
+                        뉴스 기사, 블로그, SNS 등 분석하고 싶은 글의 텍스트나 URL을 아래에 붙여넣으세요.
+                    </p>
+                    <div className="flex flex-col gap-8">
+                        {/* Top Section: Input */}
+                        <div className="space-y-4">
+                            <textarea
+                                value={text}
+                                onChange={(e) => setText(e.target.value)}
+                                placeholder={`여기에 분석할 텍스트 혹은 URL을 입력하세요.\n\n(예시)\n- https://news.kakao.com/v/2024... (뉴스 기사 URL)\n- "3일 만에 수익 1000% 보장!" (광고 문구)\n- "이거 안 사면 평생 후회합니다." (불안감 조성)`}
+                                className="w-full h-72 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 text-lg resize-y bg-gray-50/50 leading-relaxed placeholder-gray-400"
+                                disabled={isLoading}
+                                rows={12}
+                            />
+                            <button
+                                onClick={handleAnalyze}
+                                disabled={isLoading || !text.trim()}
+                                className="w-full px-6 py-4 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed text-xl"
+                            >
+                                {isLoading ? '분석 중...' : '숨은 의도 분석하기'}
+                            </button>
+                        </div>
+                    </div>
+                </>
+            )}
 
-                {/* Bottom Section: Output */}
-                <div className="relative min-h-[200px] bg-gray-50 rounded-lg p-6 border border-gray-200">
+            {/* Bottom Section: Output */}
+            {/* Show output container if we have a result (shared or new) OR if we are loading/error */}
+            {(result || isLoading || error || isSharedMode) && (
+                <div className={`relative min-h-[200px] bg-gray-50 rounded-lg p-6 border border-gray-200 ${!isSharedMode ? 'mt-8' : ''}`}>
                     {isLoading ? (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-600">
-                            <svg className="animate-spin h-8 w-8 text-blue-500 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-600 bg-white/80 z-10 rounded-lg">
+                            <svg className="animate-spin h-10 w-10 text-blue-500 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
-                            <p className="text-xl font-semibold">AI가 분석하고 있습니다...</p>
+                            <p className="text-xl font-semibold animate-pulse text-gray-800 px-4 text-center">{loadingMessage}</p>
                         </div>
                     ) : error ? (
                         <div className="flex items-center justify-center h-full text-center">
                             <div className="p-4 bg-red-50 text-red-700 border border-red-200 rounded-lg">{error}</div>
                         </div>
                     ) : result ? (
-                        <AnalysisReport result={result} originalText={text} />
-                    ) : (
-                         <div className="flex flex-col items-center justify-center h-full text-center text-gray-500">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                            </svg>
-                            <h4 className="text-xl font-semibold mb-1">분석 결과를 여기에 표시합니다</h4>
-                            <p>텍스트 혹은 URL을 입력하고 분석 버튼을 눌러주세요.</p>
-                        </div>
-                    )}
+                        <AnalysisReport 
+                            result={result} 
+                            originalText={text} 
+                            isSharedMode={isSharedMode} 
+                            onReset={handleReset} 
+                        />
+                    ) : null}
                 </div>
-            </div>
+            )}
+            
+            {/* Default Placeholder when no input and no shared result */}
+            {!result && !isLoading && !error && !isSharedMode && (
+                <div className="relative min-h-[200px] bg-gray-50 rounded-lg p-6 border border-gray-200 mt-8">
+                     <div className="flex flex-col items-center justify-center h-full text-center text-gray-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                        </svg>
+                        <h4 className="text-xl font-semibold mb-1">분석 결과를 여기에 표시합니다</h4>
+                        <p>텍스트 혹은 URL을 입력하고 분석 버튼을 눌러주세요.</p>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

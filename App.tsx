@@ -9,17 +9,39 @@ import Footer from './components/Footer';
 
 const App: React.FC = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [sharedData, setSharedData] = useState<{ score: number; intent: string; text?: string } | null>(null);
 
   useEffect(() => {
-    const hasOnboarded = localStorage.getItem('xray-onboarded');
-    if (!hasOnboarded) {
-      setShowOnboarding(true);
+    // Check for shared parameters in URL
+    const params = new URLSearchParams(window.location.search);
+    const scoreParam = params.get('score');
+    const intentParam = params.get('intent');
+    const textParam = params.get('text');
+
+    if (scoreParam && intentParam) {
+      setSharedData({
+        score: parseInt(scoreParam, 10),
+        intent: intentParam,
+        text: textParam || undefined
+      });
+    } else {
+      // Only show onboarding if not viewing a shared result
+      const hasOnboarded = localStorage.getItem('xray-onboarded');
+      if (!hasOnboarded) {
+        setShowOnboarding(true);
+      }
     }
   }, []);
 
   const handleOnboardingComplete = () => {
     localStorage.setItem('xray-onboarded', 'true');
     setShowOnboarding(false);
+  };
+
+  const handleClearSharedData = () => {
+    setSharedData(null);
+    // Remove query params from URL without reloading the page
+    window.history.replaceState({}, '', window.location.pathname);
   };
 
   return (
@@ -36,7 +58,7 @@ const App: React.FC = () => {
         </div>
 
         <div className="mb-12">
-          <TextAnalyzer />
+          <TextAnalyzer sharedData={sharedData} onClearSharedData={handleClearSharedData} />
         </div>
 
         <section id="showcase" className="mb-12 scroll-mt-24">
