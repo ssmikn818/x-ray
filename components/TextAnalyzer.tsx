@@ -1,10 +1,10 @@
-
-
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { analyzeText, type AnalysisResult } from '../services/geminiService';
 import { NARRATIVE_FRAMES } from '../constants';
 import { NarrativeFrameId, NarrativeFrame } from '../types';
+import KakaoShareButton from './KakaoShareButton';
+import ExtensionReservation from './ExtensionReservation';
 
 function escapeRegExp(string: string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
@@ -342,9 +342,16 @@ const AnalysisReport: React.FC<{ result: AnalysisResult; originalText: string; }
                 </p>
             </div>
             
-            <div className="max-w-2xl mx-auto">
-                <h4 className="text-xl font-bold text-gray-800 mb-3 text-center">숨은 의도 강도 (조작 지수)</h4>
-                <ManipulationIndexGauge score={result.manipulationIndex} />
+            <div className="max-w-2xl mx-auto space-y-6">
+                <div className="flex flex-col md:flex-row gap-6 items-stretch">
+                    <div className="flex-grow">
+                        <h4 className="text-xl font-bold text-gray-800 mb-3 text-center">숨은 의도 강도 (조작 지수)</h4>
+                        <ManipulationIndexGauge score={result.manipulationIndex} />
+                    </div>
+                    <div className="flex flex-col justify-end">
+                        <KakaoShareButton score={result.manipulationIndex} intentionSummary={result.intentionSummary} />
+                    </div>
+                </div>
             </div>
 
             <div className="border-b border-gray-200">
@@ -391,6 +398,7 @@ const AnalysisReport: React.FC<{ result: AnalysisResult; originalText: string; }
                                 <AntidoteSection content={result.comprehensiveAnalysis.criticalQuestions} />
                             </div>
                         )}
+                        <ExtensionReservation />
                     </div>
                  )}
                  {activeTab === 'source' && !isUrlAnalysis && (
