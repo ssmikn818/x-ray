@@ -415,14 +415,14 @@ const AnalysisReport: React.FC<{ result: AnalysisResult; originalText: string; }
 // --- END: New Analysis Report Components ---
 
 const TextAnalyzer: React.FC = () => {
-    const [text, setText] = useState('강남 3구 아파트, 더 이상 꿈이 아닙니다. 월 1,000만원 \'자동수익\'의 비밀, 지금 바로 공개합니다. 제 AI 자동매매 프로그램을 사용하면 누구나 3일 만에 경제적 자유를 얻을 수 있습니다. 지금 신청하지 않으면 평생 후회할 마지막 기회! 선착순 100명에게만 제공되는 특별 혜택을 놓치지 마세요. 고민하는 순간, 다른 사람이 당신의 자리를 차지합니다.');
+    const [text, setText] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [result, setResult] = useState<AnalysisResult | null>(null);
     const [error, setError] = useState<string | null>(null);
 
     const handleAnalyze = async () => {
         if (!text.trim()) {
-            setError('분석할 텍스트를 입력해주세요.');
+            setError('분석할 텍스트 혹은 URL을 입력해주세요.');
             return;
         }
         setIsLoading(true);
@@ -442,15 +442,17 @@ const TextAnalyzer: React.FC = () => {
     return (
         <div className="bg-white p-6 md:p-8 rounded-2xl border border-gray-200 shadow-lg transition-all duration-500">
             <h3 className="text-3xl font-semibold mb-2 text-gray-800 text-center">실시간 의도 분석</h3>
-            <p className="text-lg text-gray-500 text-center mb-6">분석하고 싶은 텍스트 혹은 URL을 붙여넣어 주세요.</p>
+            <p className="text-lg text-gray-500 text-center mb-6">
+                뉴스 기사, 블로그, SNS 등 분석하고 싶은 글의 텍스트나 URL을 아래에 붙여넣으세요.
+            </p>
             <div className="flex flex-col gap-8">
                 {/* Top Section: Input */}
                 <div className="space-y-4">
                     <textarea
                         value={text}
                         onChange={(e) => setText(e.target.value)}
-                        placeholder="텍스트 또는 URL을 여기에 붙여넣으세요."
-                        className="w-full h-72 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 text-lg resize-y bg-gray-50/50 leading-relaxed"
+                        placeholder={`여기에 분석할 텍스트 혹은 URL을 입력하세요.\n\n(예시)\n- https://news.kakao.com/v/2024... (뉴스 기사 URL)\n- "3일 만에 수익 1000% 보장!" (광고 문구)\n- "이거 안 사면 평생 후회합니다." (불안감 조성)`}
+                        className="w-full h-72 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 text-lg resize-y bg-gray-50/50 leading-relaxed placeholder-gray-400"
                         disabled={isLoading}
                         rows={12}
                     />
@@ -485,7 +487,7 @@ const TextAnalyzer: React.FC = () => {
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                             </svg>
                             <h4 className="text-xl font-semibold mb-1">분석 결과를 여기에 표시합니다</h4>
-                            <p>텍스트를 붙여넣고 분석 버튼을 눌러주세요.</p>
+                            <p>텍스트 혹은 URL을 입력하고 분석 버튼을 눌러주세요.</p>
                         </div>
                     )}
                 </div>

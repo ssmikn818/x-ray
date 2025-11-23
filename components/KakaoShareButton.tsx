@@ -5,49 +5,74 @@ interface KakaoShareButtonProps {
   intentionSummary: string;
 }
 
-// Updated with the provided production key
-const KAKAO_API_KEY = "d73cca4966ffe45f74e00f7a32be1755"; 
-const DOMAIN_URL = "https://x-ray-38585635934.us-west1.run.app";
+const KAKAO_API_KEY = "d73cca4966ffe45f74e00f7a32be1755";
 
 const KakaoShareButton: React.FC<KakaoShareButtonProps> = ({ score, intentionSummary }) => {
   useEffect(() => {
-    // Initialize Kakao SDK
-    if (window.Kakao && !window.Kakao.isInitialized()) {
-      try {
-        window.Kakao.init(KAKAO_API_KEY);
-      } catch (error) {
-        console.error("Failed to initialize Kakao SDK:", error);
+    // Initialize Kakao SDK on mount if available
+    if (typeof window !== 'undefined' && window.Kakao) {
+      if (!window.Kakao.isInitialized()) {
+        try {
+          window.Kakao.init(KAKAO_API_KEY);
+          console.log("Kakao SDK Initialized. Current Domain:", window.location.origin);
+        } catch (error) {
+          console.error("Failed to initialize Kakao SDK:", error);
+        }
       }
     }
   }, []);
 
   const handleShare = () => {
-    if (!window.Kakao || !window.Kakao.isInitialized()) {
-      alert("카카오톡 SDK가 로드되지 않았습니다. 잠시 후 다시 시도해주세요.");
+    // 1. Check if SDK exists
+    if (typeof window === 'undefined' || !window.Kakao) {
+      alert("카카오톡 SDK가 로드되지 않았습니다. 브라우저의 광고 차단 기능을 확인하거나 페이지를 새로고침해주세요.");
       return;
     }
 
-    window.Kakao.Share.sendDefault({
-      objectType: 'feed',
-      content: {
-        title: `[X-Ray 분석] 이 글의 조작 지수는 ${score}점 입니다.`,
-        description: `핵심 의도: ${intentionSummary}. 지금 바로 원본을 확인해보세요.`,
-        imageUrl: 'https://via.placeholder.com/600x400?text=X-Ray+Analysis', // Replace with actual OG image if available
-        link: {
-          mobileWebUrl: DOMAIN_URL,
-          webUrl: DOMAIN_URL,
-        },
-      },
-      buttons: [
-        {
-          title: '결과 자세히 보기',
+    // 2. Ensure SDK is initialized
+    if (!window.Kakao.isInitialized()) {
+      try {
+        window.Kakao.init(KAKAO_API_KEY);
+      } catch (error) {
+        console.error("Failed to initialize Kakao SDK during click:", error);
+        alert("카카오톡 공유 기능을 초기화하는 중 오류가 발생했습니다.");
+        return;
+      }
+    }
+
+    // 3. Get Current URL dynamically
+    // This ensures the link works in both dev (localhost) and prod environments,
+    // provided the domain is registered in Kakao Developers Console.
+    const currentUrl = window.location.href;
+
+    // 3. Send Share Request
+    try {
+      window.Kakao.Share.sendDefault({
+        objectType: 'feed',
+        content: {
+          title: `[X-Ray 분석] 조작 지수 ${score}점`,
+          description: `핵심 의도: ${intentionSummary}\n\nAI가 분석한 콘텐츠의 숨은 의도를 확인해보세요.`,
+          imageUrl: 'https://cdn-icons-png.flaticon.com/512/3075/3075977.png', // Generic Analysis Icon
           link: {
-            mobileWebUrl: DOMAIN_URL,
-            webUrl: DOMAIN_URL,
+            mobileWebUrl: currentUrl,
+            webUrl: currentUrl,
           },
         },
-      ],
-    });
+        buttons: [
+          {
+            title: '결과 자세히 보기',
+            link: {
+              mobileWebUrl: currentUrl,
+              webUrl: currentUrl,
+            },
+          },
+        ],
+      });
+      console.log("Kakao share request sent using URL:", currentUrl);
+    } catch (error) {
+      console.error("Error sending Kakao share request:", error);
+      alert("카카오톡 공유 요청 중 오류가 발생했습니다. 카카오 개발자 센터에 현재 도메인이 등록되어 있는지 확인해주세요.");
+    }
   };
 
   return (
@@ -63,7 +88,6 @@ const KakaoShareButton: React.FC<KakaoShareButtonProps> = ({ score, intentionSum
   );
 };
 
-// Add type definition for global window object
 declare global {
   interface Window {
     Kakao: any;
