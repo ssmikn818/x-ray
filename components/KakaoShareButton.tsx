@@ -47,11 +47,11 @@ const KakaoShareButton: React.FC<KakaoShareButtonProps> = ({ score, intentionSum
     shareUrl.searchParams.set('score', score.toString());
     shareUrl.searchParams.set('intent', intentionSummary);
     
-    // FIX: Reduced safe limit from 1500 to 300 to prevent 'Failed request' errors.
-    // Explanation: Korean characters (3 bytes) encode to ~9 characters in URL (e.g. %E1%88%B4).
-    // 1500 chars * 9 = ~13,500 characters, which exceeds browser/API URL length limits.
-    // 300 chars * 9 = ~2,700 characters, which is within safe limits for most sharing APIs.
-    const MAX_TEXT_LENGTH = 300; 
+    // FIX: Further reduced safe limit significantly to prevent 'Failed request' errors.
+    // Korean characters (3 bytes) encode to ~9 characters in URL (e.g. %E1%88%B4).
+    // Even 300 characters can exceed the URL length limit (approx 2000-4000 depending on environment).
+    // Reduced to 100 characters to ensure stability.
+    const MAX_TEXT_LENGTH = 100; 
     const truncatedText = originalText.length > MAX_TEXT_LENGTH 
         ? originalText.slice(0, MAX_TEXT_LENGTH) + '...' 
         : originalText;
