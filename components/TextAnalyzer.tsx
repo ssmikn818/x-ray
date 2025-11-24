@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { analyzeText, type AnalysisResult } from '../services/geminiService';
@@ -317,6 +318,91 @@ const AntidoteSection: React.FC<{ content: string }> = ({ content }) => {
     );
 };
 
+// --- START: Digital Advisor Component ---
+const detectIntentType = (intent: string) => {
+  if (!intent) return 'DEFAULT';
+  const financialKeywords = ['금전', '이득', '수익', '투자', '보장', '계좌', '돈', '입금'];
+  const fearKeywords = ['공포', '불안', '선동', '혐오', '음모', '희생양', '위기', '파멸'];
+  const marketingKeywords = ['과장', '긴급', '한정', '매진', '마감', '기회', '혜택'];
+  if (financialKeywords.some(k => intent.includes(k))) return 'FINANCIAL';
+  if (fearKeywords.some(k => intent.includes(k))) return 'FEAR';
+  if (marketingKeywords.some(k => intent.includes(k))) return 'MARKETING';
+  return 'DEFAULT';
+};
+
+const DigitalAdvisor: React.FC<{ score: number; intent: string }> = ({ score, intent }) => {
+    const category = detectIntentType(intent);
+    
+    // Default advice (Low/Medium risk or Default category)
+    let advice = {
+        action: "🛡️ 경계심을 가지고 읽어야 합니다.",
+        explanation: "숨겨진 의도가 감지되었습니다. 액면 그대로 믿지 말고 비판적으로 바라보세요.",
+        bg: "bg-yellow-50",
+        border: "border-yellow-200",
+        text: "text-yellow-800"
+    };
+
+    if (score >= 70) {
+        switch (category) {
+            case 'FINANCIAL':
+                advice = {
+                    action: "⛔ 절대 링크를 누르거나 송금하지 마세요.",
+                    explanation: "금전적 이득을 미끼로 사기를 치려는 전형적인 수법입니다. 즉시 삭제 및 차단하세요.",
+                    bg: "bg-red-50",
+                    border: "border-red-200",
+                    text: "text-red-800"
+                };
+                break;
+            case 'FEAR':
+                advice = {
+                    action: "🤔 사실이 아닐 확률이 높습니다.",
+                    explanation: "불안감과 분노를 자극해 판단력을 흐리는 선동 문구입니다. 다른 사람에게 공유하지 마세요.",
+                    bg: "bg-orange-50",
+                    border: "border-orange-200",
+                    text: "text-orange-800"
+                };
+                break;
+            case 'MARKETING':
+                advice = {
+                    action: "💳 충동적인 결제를 멈추세요.",
+                    explanation: "'마감 임박' 등으로 조급함을 유발하고 있습니다. 실제 후기를 다시 한번 검색해보세요.",
+                    bg: "bg-amber-50",
+                    border: "border-amber-200",
+                    text: "text-amber-800"
+                };
+                break;
+            default:
+                advice = {
+                    action: "🚫 매우 높은 위험이 감지되었습니다.",
+                    explanation: "이 글은 당신의 판단을 조작하려는 강한 의도를 가지고 있습니다.",
+                    bg: "bg-red-50",
+                    border: "border-red-200",
+                    text: "text-red-800"
+                };
+        }
+    } else if (score < 40) {
+         advice = {
+            action: "✅ 비교적 안전한 콘텐츠입니다.",
+            explanation: "하지만 언제나 비판적인 시각을 유지하는 것이 좋습니다.",
+            bg: "bg-green-50",
+            border: "border-green-200",
+            text: "text-green-800"
+        };
+    }
+
+    return (
+        <div className={`${advice.bg} border ${advice.border} rounded-xl p-6 mt-6 animate-fade-in shadow-sm`}>
+            <div className="flex items-start">
+                <div className="flex-grow">
+                    <h5 className={`text-lg font-bold ${advice.text} mb-2`}>{advice.action}</h5>
+                    <p className="text-gray-700 leading-relaxed">{advice.explanation}</p>
+                </div>
+            </div>
+        </div>
+    );
+};
+// --- END: Digital Advisor Component ---
+
 
 const AnalysisReport: React.FC<{ 
     result: AnalysisResult; 
@@ -376,6 +462,11 @@ const AnalysisReport: React.FC<{
                     <div className="flex-grow">
                         <h4 className="text-xl font-bold text-gray-800 mb-3 text-center">숨은 의도 강도 (조작 지수)</h4>
                         <ManipulationIndexGauge score={result.manipulationIndex} />
+                        
+                        {/* Digital Advisor for Shared Mode */}
+                        {isSharedMode && (
+                            <DigitalAdvisor score={result.manipulationIndex} intent={result.intentionSummary} />
+                        )}
                     </div>
                     <div className="flex flex-col justify-end">
                         <KakaoShareButton 
@@ -444,7 +535,7 @@ const AnalysisReport: React.FC<{
                                 {originalText && (
                                     <div className="bg-gray-100 p-6 rounded-lg border border-gray-200">
                                         <h4 className="text-lg font-bold text-gray-800 mb-3">분석된 원본 내용:</h4>
-                                        <div className="whitespace-pre-wrap text-gray-700 text-base leading-relaxed break-words max-h-96 overflow-y-auto">
+                                        <div className="whitespace-pre-wrap text-gray-700 text-base leading-relaxed break-words max-h-64 overflow-y-auto pr-2 custom-scrollbar">
                                             {originalText}
                                         </div>
                                     </div>

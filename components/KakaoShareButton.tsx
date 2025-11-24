@@ -9,6 +9,21 @@ interface KakaoShareButtonProps {
 
 const KAKAO_API_KEY = "d73cca4966ffe45f74e00f7a32be1755";
 
+// Intent Categorization Logic
+const detectIntentType = (intent: string) => {
+  if (!intent) return 'DEFAULT';
+  
+  const financialKeywords = ['금전', '이득', '수익', '투자', '보장', '계좌', '돈', '입금'];
+  const fearKeywords = ['공포', '불안', '선동', '혐오', '음모', '희생양', '위기', '파멸'];
+  const marketingKeywords = ['과장', '긴급', '한정', '매진', '마감', '기회', '혜택'];
+
+  if (financialKeywords.some(k => intent.includes(k))) return 'FINANCIAL';
+  if (fearKeywords.some(k => intent.includes(k))) return 'FEAR';
+  if (marketingKeywords.some(k => intent.includes(k))) return 'MARKETING';
+  
+  return 'DEFAULT';
+};
+
 const KakaoShareButton: React.FC<KakaoShareButtonProps> = ({ score, intentionSummary, originalText }) => {
   useEffect(() => {
     // Initialize Kakao SDK on mount if available
@@ -41,7 +56,27 @@ const KakaoShareButton: React.FC<KakaoShareButtonProps> = ({ score, intentionSum
       }
     }
 
-    // 3. Generate Share URL with Query Params
+    // 3. Generate Smart Title based on Category & Score
+    const category = detectIntentType(intentionSummary);
+    let title = "🔍 X-Ray AI 분석 결과 도착";
+
+    if (score >= 70) {
+      switch (category) {
+        case 'FINANCIAL':
+          title = "🚨 [긴급] 금융 사기 위험 감지!";
+          break;
+        case 'FEAR':
+          title = "⚠️ [주의] 가짜 뉴스/선동 위험!";
+          break;
+        case 'MARKETING':
+          title = "💸 [경고] 과장 광고에 속지 마세요.";
+          break;
+        default:
+          title = "🚫 [위험] 조작된 의도가 감지되었습니다.";
+      }
+    }
+
+    // 4. Generate Share URL with Query Params
     // Use window.location.href.split('?')[0] to get the clean base URL safely in all environments
     const baseUrl = window.location.href.split('?')[0];
     const shareUrl = new URL(baseUrl);
@@ -52,7 +87,6 @@ const KakaoShareButton: React.FC<KakaoShareButtonProps> = ({ score, intentionSum
     shareUrl.searchParams.set('intent', intentionSummary);
     
     // Increase text limit to 1000 chars to provide full context as requested
-    // Note: Extremely long URLs might be truncated by some browsers/apps, but 1000 chars is generally safe for modern sharing.
     const MAX_TEXT_LENGTH = 1000; 
     const truncatedText = originalText 
         ? (originalText.length > MAX_TEXT_LENGTH ? originalText.slice(0, MAX_TEXT_LENGTH) + '...' : originalText)
@@ -61,13 +95,13 @@ const KakaoShareButton: React.FC<KakaoShareButtonProps> = ({ score, intentionSum
 
     const finalUrl = shareUrl.toString();
 
-    // 4. Send Share Request
+    // 5. Send Share Request
     try {
       window.Kakao.Share.sendDefault({
         objectType: 'feed',
         content: {
-          title: `[X-Ray 분석 결과] 조작 지수 ${score}점`,
-          description: `핵심 의도: ${intentionSummary}\n👇 아래 버튼을 눌러 원문과 상세 분석을 확인하세요.`,
+          title: title,
+          description: `핵심 의도: ${intentionSummary} (조작 지수 ${score}점)\n👇 아래 버튼을 눌러 원문과 상세 분석을 확인하세요.`,
           imageUrl: 'https://cdn-icons-png.flaticon.com/512/3075/3075977.png', // Generic Analysis Icon
           link: {
             mobileWebUrl: finalUrl,
