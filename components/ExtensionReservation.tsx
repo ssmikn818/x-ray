@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 
 const ExtensionReservation: React.FC = () => {
@@ -40,7 +41,7 @@ const ExtensionReservation: React.FC = () => {
             onClick={() => setIsModalOpen(true)}
             className="flex-shrink-0 px-6 py-3 bg-gray-900 text-white font-bold rounded-lg shadow-lg hover:bg-gray-800 transform hover:-translate-y-0.5 transition-all duration-200"
         >
-            🚀 확장 프로그램 베타 테스터 신청하기 (무료)
+            🚀 X-Ray Pro 사전 예약하기 (무료)
         </button>
       </div>
 
@@ -62,14 +63,14 @@ const ExtensionReservation: React.FC = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                     </svg>
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900">베타 테스터 신청</h3>
-                <p className="text-gray-600 mt-2">이메일을 남겨주시면 확장 프로그램 출시 소식을 가장 먼저 알려드립니다.</p>
+                <h3 className="text-2xl font-bold text-gray-900">X-Ray Pro 사전 예약</h3>
+                <p className="text-gray-600 mt-2">이메일을 남겨주시면 X-Ray Pro 출시 소식을 가장 먼저 알려드립니다.</p>
             </div>
 
             {isSubmitted ? (
                 <div className="text-center py-8">
                     <div className="text-green-500 text-5xl mb-4">✓</div>
-                    <p className="text-xl font-bold text-gray-800">신청이 완료되었습니다!</p>
+                    <p className="text-xl font-bold text-gray-800">예약이 완료되었습니다!</p>
                 </div>
             ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -90,7 +91,7 @@ const ExtensionReservation: React.FC = () => {
                         disabled={isSubmitting}
                         className={`w-full py-3 px-4 bg-blue-600 text-white font-bold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all ${isSubmitting ? 'opacity-75 cursor-not-allowed' : ''}`}
                     >
-                        {isSubmitting ? '처리 중...' : '신청 완료'}
+                        {isSubmitting ? '처리 중...' : '예약 완료'}
                     </button>
                 </form>
             )}

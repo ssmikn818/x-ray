@@ -6,6 +6,7 @@ import OnboardingModal from './components/OnboardingModal';
 import TextAnalyzer from './components/TextAnalyzer';
 import FrustratingContentShowcase from './components/FrustratingContentShowcase';
 import ValueProposition from './components/ValueProposition';
+import PricingSection from './components/PricingSection';
 import Footer from './components/Footer';
 
 const App: React.FC = () => {
@@ -70,7 +71,8 @@ const App: React.FC = () => {
           </p>
         </div>
 
-        <div className="mb-12">
+        {/* Added id for Pricing Section 'Basic Plan' button scroll target */}
+        <div id="analyzer-section" className="mb-12">
           <TextAnalyzer sharedData={sharedData} onClearSharedData={handleClearSharedData} />
         </div>
 
@@ -81,6 +83,8 @@ const App: React.FC = () => {
         <section id="value-prop" className="mb-24 scroll-mt-24">
             <ValueProposition />
         </section>
+        
+        <PricingSection />
 
         <Dashboard />
       </main>

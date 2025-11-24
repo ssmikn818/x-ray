@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { analyzeText, type AnalysisResult } from '../services/geminiService';
@@ -243,7 +242,7 @@ const DetectedFrameItem: React.FC<{ frameId: NarrativeFrameId; score: number; ex
             >
                 <div className="flex items-center space-x-3 flex-shrink-0 w-[140px] md:w-[160px]">
                     <div className={`${frame.color} bg-opacity-20 p-2 rounded-md`}>
-                        {React.cloneElement(frame.icon, { className: 'h-5 w-5', style: { color: frame.hexColor } })}
+                        {React.cloneElement(frame.icon as React.ReactElement<any>, { className: 'h-5 w-5', style: { color: frame.hexColor } })}
                     </div>
                     <span className="font-semibold text-gray-800">{frame.name}</span>
                 </div>

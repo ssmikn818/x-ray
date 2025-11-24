@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { NarrativeFrameId } from '../types';
 import { NARRATIVE_FRAMES } from '../constants';
@@ -36,7 +37,7 @@ const NarrativeDetailCard: React.FC<NarrativeDetailCardProps> = ({ narrativeId, 
         <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
                 <div className={`p-3 rounded-full ${narrative.color} text-white`}>
-                    {React.cloneElement(narrative.icon, { className: 'h-7 w-7' })}
+                     {React.isValidElement(narrative.icon) && React.cloneElement(narrative.icon as React.ReactElement<any>, { className: 'h-7 w-7' })}
                 </div>
                 <div>
                     <h4 className="font-semibold text-gray-800 text-xl">{narrative.name}</h4>

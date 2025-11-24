@@ -76,7 +76,22 @@ const KakaoShareButton: React.FC<KakaoShareButtonProps> = ({ score, intentionSum
       }
     }
 
-    // 4. Generate Share URL with Query Params
+    // 4. Determine Dynamic Thumbnail based on Score
+    // High Risk (Red Siren)
+    const IMG_HIGH_RISK = 'https://cdn-icons-png.flaticon.com/512/179/179386.png';
+    // Medium Risk (Yellow Caution)
+    const IMG_MEDIUM_RISK = 'https://cdn-icons-png.flaticon.com/512/595/595067.png';
+    // Low Risk / Default (Blue Trustworthy)
+    const IMG_LOW_RISK = 'https://cdn-icons-png.flaticon.com/512/1066/1066371.png';
+
+    let imageUrl = IMG_LOW_RISK;
+    if (score >= 80) {
+        imageUrl = IMG_HIGH_RISK;
+    } else if (score >= 50) {
+        imageUrl = IMG_MEDIUM_RISK;
+    }
+
+    // 5. Generate Share URL with Query Params
     // Use window.location.href.split('?')[0] to get the clean base URL safely in all environments
     const baseUrl = window.location.href.split('?')[0];
     const shareUrl = new URL(baseUrl);
@@ -86,9 +101,7 @@ const KakaoShareButton: React.FC<KakaoShareButtonProps> = ({ score, intentionSum
     shareUrl.searchParams.set('score', String(score));
     shareUrl.searchParams.set('intent', intentionSummary);
     
-    // FIX: Reduced limit from 1000 to 200.
-    // Korean characters encoded are ~9 chars each. 1000 chars = ~9000 bytes, which exceeds standard URL limits (2048 bytes).
-    // 200 chars * 9 = 1800 bytes, which is safe for most browsers and Kakao API.
+    // Reduced limit from 1000 to 200 to prevent URL length errors
     const MAX_TEXT_LENGTH = 200; 
     const truncatedText = originalText 
         ? (originalText.length > MAX_TEXT_LENGTH ? originalText.slice(0, MAX_TEXT_LENGTH) + '...' : originalText)
@@ -97,14 +110,16 @@ const KakaoShareButton: React.FC<KakaoShareButtonProps> = ({ score, intentionSum
 
     const finalUrl = shareUrl.toString();
 
-    // 5. Send Share Request
+    // 6. Send Share Request
     try {
       window.Kakao.Share.sendDefault({
         objectType: 'feed',
         content: {
           title: title,
           description: `핵심 의도: ${intentionSummary} (조작 지수 ${score}점)\n👇 아래 버튼을 눌러 원문과 상세 분석을 확인하세요.`,
-          imageUrl: 'https://cdn-icons-png.flaticon.com/512/3075/3075977.png', // Generic Analysis Icon
+          imageUrl: imageUrl,
+          imageWidth: 800,
+          imageHeight: 400,
           link: {
             mobileWebUrl: finalUrl,
             webUrl: finalUrl,
