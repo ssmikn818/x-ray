@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 
 interface KakaoShareButtonProps {
@@ -15,7 +16,6 @@ const KakaoShareButton: React.FC<KakaoShareButtonProps> = ({ score, intentionSum
       if (!window.Kakao.isInitialized()) {
         try {
           window.Kakao.init(KAKAO_API_KEY);
-          // console.log("Kakao SDK Initialized. Current Domain:", window.location.origin);
         } catch (error) {
           console.error("Failed to initialize Kakao SDK:", error);
         }
@@ -42,19 +42,21 @@ const KakaoShareButton: React.FC<KakaoShareButtonProps> = ({ score, intentionSum
     }
 
     // 3. Generate Share URL with Query Params
-    // Use origin + pathname to start with a clean URL, then append params
-    const shareUrl = new URL(window.location.origin + window.location.pathname);
-    shareUrl.searchParams.set('score', score.toString());
+    // Use window.location.href.split('?')[0] to get the clean base URL safely in all environments
+    const baseUrl = window.location.href.split('?')[0];
+    const shareUrl = new URL(baseUrl);
+    
+    // Explicitly add parameters
+    shareUrl.searchParams.set('mode', 'share'); // Identify this as a shared link visit
+    shareUrl.searchParams.set('score', String(score));
     shareUrl.searchParams.set('intent', intentionSummary);
     
-    // FIX: Further reduced safe limit significantly to prevent 'Failed request' errors.
-    // Korean characters (3 bytes) encode to ~9 characters in URL (e.g. %E1%88%B4).
-    // Even 300 characters can exceed the URL length limit (approx 2000-4000 depending on environment).
-    // Reduced to 100 characters to ensure stability.
-    const MAX_TEXT_LENGTH = 100; 
-    const truncatedText = originalText.length > MAX_TEXT_LENGTH 
-        ? originalText.slice(0, MAX_TEXT_LENGTH) + '...' 
-        : originalText;
+    // Increase text limit to 1000 chars to provide full context as requested
+    // Note: Extremely long URLs might be truncated by some browsers/apps, but 1000 chars is generally safe for modern sharing.
+    const MAX_TEXT_LENGTH = 1000; 
+    const truncatedText = originalText 
+        ? (originalText.length > MAX_TEXT_LENGTH ? originalText.slice(0, MAX_TEXT_LENGTH) + '...' : originalText)
+        : '';
     shareUrl.searchParams.set('text', truncatedText);
 
     const finalUrl = shareUrl.toString();
@@ -64,8 +66,8 @@ const KakaoShareButton: React.FC<KakaoShareButtonProps> = ({ score, intentionSum
       window.Kakao.Share.sendDefault({
         objectType: 'feed',
         content: {
-          title: `[X-Ray 분석] 조작 지수 ${score}점`,
-          description: `핵심 의도: ${intentionSummary}\n\nAI가 분석한 콘텐츠의 숨은 의도를 확인해보세요.`,
+          title: `[X-Ray 분석 결과] 조작 지수 ${score}점`,
+          description: `핵심 의도: ${intentionSummary}\n👇 아래 버튼을 눌러 원문과 상세 분석을 확인하세요.`,
           imageUrl: 'https://cdn-icons-png.flaticon.com/512/3075/3075977.png', // Generic Analysis Icon
           link: {
             mobileWebUrl: finalUrl,
@@ -74,7 +76,7 @@ const KakaoShareButton: React.FC<KakaoShareButtonProps> = ({ score, intentionSum
         },
         buttons: [
           {
-            title: '결과 자세히 보기',
+            title: '결과 및 원문 전체 보기',
             link: {
               mobileWebUrl: finalUrl,
               webUrl: finalUrl,

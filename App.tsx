@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import Header from './components/Header';
 import Dashboard from './components/Dashboard';
@@ -14,22 +15,32 @@ const App: React.FC = () => {
   useEffect(() => {
     // Check for shared parameters in URL
     const params = new URLSearchParams(window.location.search);
+    const modeParam = params.get('mode');
     const scoreParam = params.get('score');
     const intentParam = params.get('intent');
     const textParam = params.get('text');
 
-    if (scoreParam && intentParam) {
-      setSharedData({
-        score: parseInt(scoreParam, 10),
-        intent: intentParam,
-        text: textParam || undefined
-      });
-    } else {
-      // Only show onboarding if not viewing a shared result
-      const hasOnboarded = localStorage.getItem('xray-onboarded');
-      if (!hasOnboarded) {
-        setShowOnboarding(true);
+    // Robust check for score and intent (handling score=0 correctly)
+    // We check if mode is 'share' OR if the basic params exist
+    if ((modeParam === 'share' || (scoreParam !== null && intentParam))) {
+      const parsedScore = scoreParam ? parseInt(scoreParam, 10) : 0;
+      
+      if (!isNaN(parsedScore)) {
+        setSharedData({
+          score: parsedScore,
+          intent: intentParam || '분석 결과',
+          text: textParam || undefined
+        });
+        
+        // If in share mode, we might want to skip onboarding
+        return; 
       }
+    } 
+
+    // Only show onboarding if not viewing a shared result
+    const hasOnboarded = localStorage.getItem('xray-onboarded');
+    if (!hasOnboarded) {
+      setShowOnboarding(true);
     }
   }, []);
 
@@ -50,10 +61,12 @@ const App: React.FC = () => {
       <main className="container mx-auto p-4 md:p-8 max-w-7xl flex-grow">
         <div className="text-center my-12 md:my-20 animate-fade-in">
           <h2 className="text-5xl md:text-6xl font-bold text-gray-900 leading-relaxed mb-4">
-            혹시, 이 글... 진짜일까?
+            {sharedData ? '공유받은 분석 리포트' : '혹시, 이 글... 진짜일까?'}
           </h2>
           <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
-            AI로 숨은 의도를 파헤쳐 보세요. 우리가 매일 보는 콘텐츠, 진짜 무엇을 말하고 싶은 걸까요?
+            {sharedData 
+              ? 'AI가 분석한 콘텐츠의 숨은 의도와 원문을 확인해보세요.' 
+              : 'AI로 숨은 의도를 파헤쳐 보세요. 우리가 매일 보는 콘텐츠, 진짜 무엇을 말하고 싶은 걸까요?'}
           </p>
         </div>
 
