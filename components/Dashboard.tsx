@@ -153,11 +153,11 @@ const Dashboard: React.FC = () => {
             <div id="roadmap" className="py-16 md:py-24 bg-gradient-to-br from-purple-100 via-blue-100 to-green-100 scroll-mt-24">
                 <div className="container mx-auto px-4 md:px-8">
                     <div className="text-center mb-16 md:mb-20">
-                        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 leading-relaxed mb-4">
-                            텍스트를 넘어, 세상 모든 콘텐츠를 꿰뚫어 봅니다
+                        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight mb-4">
+                            X-Ray는 텍스트를 넘어 영상까지,<br/>미디어의 진실을 꿰뚫어 봅니다
                         </h2>
                         <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                            현재는 텍스트 분석에 집중하고 있지만, 향후 종합적인 미디어 리터러시 솔루션으로 발전해 나갈 계획입니다. X-Ray의 발전을 가장 먼저 확인하세요!
+                            단순한 텍스트 분석을 넘어, 영상과 이미지에 숨겨진 의도까지 파악하는 종합 미디어 리터러시 솔루션으로 진화합니다. X-Ray의 미래를 기대해주세요.
                         </p>
                     </div>
                     
