@@ -15,7 +15,7 @@ const KakaoShareButton: React.FC<KakaoShareButtonProps> = ({ score, intentionSum
       if (!window.Kakao.isInitialized()) {
         try {
           window.Kakao.init(KAKAO_API_KEY);
-          console.log("Kakao SDK Initialized. Current Domain:", window.location.origin);
+          // console.log("Kakao SDK Initialized. Current Domain:", window.location.origin);
         } catch (error) {
           console.error("Failed to initialize Kakao SDK:", error);
         }
@@ -47,9 +47,13 @@ const KakaoShareButton: React.FC<KakaoShareButtonProps> = ({ score, intentionSum
     shareUrl.searchParams.set('score', score.toString());
     shareUrl.searchParams.set('intent', intentionSummary);
     
-    // Encode original text (Safe limit: 1500 chars to avoid URL overflow issues)
-    const truncatedText = originalText.length > 1500 
-        ? originalText.slice(0, 1500) + '...' 
+    // FIX: Reduced safe limit from 1500 to 300 to prevent 'Failed request' errors.
+    // Explanation: Korean characters (3 bytes) encode to ~9 characters in URL (e.g. %E1%88%B4).
+    // 1500 chars * 9 = ~13,500 characters, which exceeds browser/API URL length limits.
+    // 300 chars * 9 = ~2,700 characters, which is within safe limits for most sharing APIs.
+    const MAX_TEXT_LENGTH = 300; 
+    const truncatedText = originalText.length > MAX_TEXT_LENGTH 
+        ? originalText.slice(0, MAX_TEXT_LENGTH) + '...' 
         : originalText;
     shareUrl.searchParams.set('text', truncatedText);
 
@@ -78,7 +82,6 @@ const KakaoShareButton: React.FC<KakaoShareButtonProps> = ({ score, intentionSum
           },
         ],
       });
-      console.log("Kakao share request sent using URL:", finalUrl);
     } catch (error) {
       console.error("Error sending Kakao share request:", error);
       alert("카카오톡 공유 요청 중 오류가 발생했습니다. 카카오 개발자 센터에 현재 도메인이 등록되어 있는지 확인해주세요.");
