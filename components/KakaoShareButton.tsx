@@ -86,8 +86,10 @@ const KakaoShareButton: React.FC<KakaoShareButtonProps> = ({ score, intentionSum
     shareUrl.searchParams.set('score', String(score));
     shareUrl.searchParams.set('intent', intentionSummary);
     
-    // Increase text limit to 1000 chars to provide full context as requested
-    const MAX_TEXT_LENGTH = 1000; 
+    // FIX: Reduced limit from 1000 to 200.
+    // Korean characters encoded are ~9 chars each. 1000 chars = ~9000 bytes, which exceeds standard URL limits (2048 bytes).
+    // 200 chars * 9 = 1800 bytes, which is safe for most browsers and Kakao API.
+    const MAX_TEXT_LENGTH = 200; 
     const truncatedText = originalText 
         ? (originalText.length > MAX_TEXT_LENGTH ? originalText.slice(0, MAX_TEXT_LENGTH) + '...' : originalText)
         : '';

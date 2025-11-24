@@ -149,7 +149,6 @@ const HighlightedText: React.FC<{ originalText: string; analysis: AnalysisResult
                 });
             }
         });
-        // Remove duplicates to avoid issues with splitting, prioritizing longer spans
         const uniqueSpans = Array.from(new Map(allSpans.sort((a,b) => b.text.length - a.text.length).map(item => [item.text, item])).values());
         return uniqueSpans;
     }, [analysis]);
@@ -170,7 +169,7 @@ const HighlightedText: React.FC<{ originalText: string; analysis: AnalysisResult
                         <Tooltip key={index} text={highlight.explanation}>
                             <mark
                                 className="px-1 py-0.5 rounded-md cursor-pointer"
-                                style={{ backgroundColor: `${highlight.frame.hexColor}50` }} // 31% opacity for better visibility
+                                style={{ backgroundColor: `${highlight.frame.hexColor}50` }} 
                             >
                                 {part}
                             </mark>
@@ -393,9 +392,18 @@ const DigitalAdvisor: React.FC<{ score: number; intent: string }> = ({ score, in
     return (
         <div className={`${advice.bg} border ${advice.border} rounded-xl p-6 mt-6 animate-fade-in shadow-sm`}>
             <div className="flex items-start">
+                 <div className="flex-shrink-0 mr-4">
+                     {score >= 70 ? (
+                         <span className="text-3xl">⚠️</span>
+                     ) : score < 40 ? (
+                         <span className="text-3xl">🌿</span>
+                     ) : (
+                         <span className="text-3xl">🧐</span>
+                     )}
+                 </div>
                 <div className="flex-grow">
-                    <h5 className={`text-lg font-bold ${advice.text} mb-2`}>{advice.action}</h5>
-                    <p className="text-gray-700 leading-relaxed">{advice.explanation}</p>
+                    <h5 className={`text-lg font-bold ${advice.text} mb-1`}>{advice.action}</h5>
+                    <p className="text-gray-700 leading-relaxed text-sm md:text-base">{advice.explanation}</p>
                 </div>
             </div>
         </div>
@@ -468,13 +476,15 @@ const AnalysisReport: React.FC<{
                             <DigitalAdvisor score={result.manipulationIndex} intent={result.intentionSummary} />
                         )}
                     </div>
-                    <div className="flex flex-col justify-end">
-                        <KakaoShareButton 
-                            score={result.manipulationIndex} 
-                            intentionSummary={result.intentionSummary} 
-                            originalText={originalText}
-                        />
-                    </div>
+                    {!isSharedMode && (
+                        <div className="flex flex-col justify-end">
+                            <KakaoShareButton 
+                                score={result.manipulationIndex} 
+                                intentionSummary={result.intentionSummary} 
+                                originalText={originalText}
+                            />
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -534,7 +544,7 @@ const AnalysisReport: React.FC<{
                                 {/* Shared Mode Original Text Display */}
                                 {originalText && (
                                     <div className="bg-gray-100 p-6 rounded-lg border border-gray-200">
-                                        <h4 className="text-lg font-bold text-gray-800 mb-3">분석된 원본 내용:</h4>
+                                        <h4 className="text-lg font-bold text-gray-800 mb-3">분석된 원문 내용 (일부):</h4>
                                         <div className="whitespace-pre-wrap text-gray-700 text-base leading-relaxed break-words max-h-64 overflow-y-auto pr-2 custom-scrollbar">
                                             {originalText}
                                         </div>
@@ -606,7 +616,6 @@ const TextAnalyzer: React.FC<TextAnalyzerProps> = ({ sharedData, onClearSharedDa
 
     // Effect for rotating loading messages
     useEffect(() => {
-        // FIX: Replace explicit NodeJS.Timeout with ReturnType<typeof setInterval> to support browser environments.
         let interval: ReturnType<typeof setInterval> | undefined;
         if (isLoading) {
              // Set initial random message
